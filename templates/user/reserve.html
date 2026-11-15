@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+{% block title %}Reserve Parking Slot - ParkSmart{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="custom-card p-4 p-md-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <div>
+            <span class="badge px-3 py-1 mb-1" style="background-color: var(--forest-green-light); color: var(--forest-green);">TRANSACTIONAL RESERVATION</span>
+            <h2 class="serif-heading mb-0">Reserve Parking Bay</h2>
+          </div>
+          <a href="{{ url_for('parking_availability') }}" class="btn-outline-forest btn-sm">&larr; Back to Visual Grid</a>
+        </div>
+
+        <!-- Selected Bay Overview Card -->
+        <div class="p-3 rounded mb-4" style="background-color: var(--bg-card-subtle); border: 1px solid var(--border-subtle);">
+          <div class="row g-3 align-items-center">
+            <div class="col-md-3 text-center border-end">
+              <div class="text-muted" style="font-size:0.75rem;">SELECTED BAY</div>
+              <div class="display-6 fw-bold font-monospace text-primary">{{ slot.slot_number }}</div>
+              <div class="badge badge-available">{{ slot.slot_status }}</div>
+            </div>
+            <div class="col-md-9 ps-md-4">
+              <h5 class="fw-bold mb-1">{{ slot.area_name }}</h5>
+              <p class="text-muted mb-2" style="font-size:0.85rem;">📍 {{ slot.location_address }}</p>
+              <div class="d-flex flex-wrap gap-3" style="font-size:0.85rem;">
+                <span>Floor: <strong>{{ slot.floor_level }}</strong></span>
+                <span>Category: <strong>{{ slot.supported_vehicle_type.replace('_', ' ') }}</strong></span>
+                <span>Tariff: <strong>₹{{ slot.base_hourly_rate }} / hour</strong></span>
+                {% if slot.is_ev_charging_equipped %}
+                  <span class="text-success fw-bold">⚡ EV Charging Available</span>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Reservation Form -->
+        <form method="POST" action="{{ url_for('user_reserve_slot') }}">
+          <input type="hidden" name="slot_id" value="{{ slot.slot_id }}">
+
+          <div class="mb-3">
+            <label class="form-label text-secondary fw-semibold" style="font-size:0.88rem;">Select Your Vehicle</label>
+            {% if vehicles %}
+            <select name="vehicle_id" class="form-select" required>
+              {% for v in vehicles %}
+              <option value="{{ v.vehicle_id }}" {% if v.vehicle_type != slot.supported_vehicle_type %}disabled{% endif %}>
+                {{ v.license_plate }} ({{ v.make_model or v.vehicle_type }}) 
+                {% if v.vehicle_type != slot.supported_vehicle_type %}[Incompatible Type]{% endif %}
+              </option>
+              {% endfor %}
+            </select>
+            {% else %}
+            <div class="alert alert-warning py-2" style="font-size:0.85rem;">
+              You haven't registered any vehicles yet. <a href="{{ url_for('user_vehicles') }}">Register a vehicle first &rarr;</a>
+            </div>
+            {% endif %}
+          </div>
+
+          <div class="row g-3 mb-4">
+            <div class="col-md-6">
+              <label class="form-label text-secondary fw-semibold" style="font-size:0.88rem;">Parking Start Time</label>
+              <input type="datetime-local" name="start_time" id="startTime" class="form-control" required value="{{ default_start }}">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label text-secondary fw-semibold" style="font-size:0.88rem;">Expected End Time</label>
+              <input type="datetime-local" name="end_time" id="endTime" class="form-control" required value="{{ default_end }}">
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label text-secondary fw-semibold" style="font-size:0.88rem;">Payment Settlement Method</label>
+            <div class="d-flex flex-wrap gap-3">
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="payment_method" id="payWallet" value="WALLET" checked>
+                <label class="form-check-label" for="payWallet">
+                  ParkSmart Wallet (Bal: ₹{{ "%.2f"|format(user.wallet_balance) }})
+                </label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="payment_method" id="payUPI" value="UPI">
+                <label class="form-check-label" for="payUPI">UPI / QR</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="payment_method" id="payCard" value="CREDIT_CARD">
+                <label class="form-check-label" for="payCard">Credit / Debit Card</label>
+              </div>
+            </div>
+          </div>
+
+          <div class="p-3 rounded mb-4" style="background-color: var(--forest-green-light); border: 1px solid var(--forest-green);">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <strong style="color: var(--forest-green);">Concurrency Safe Booking:</strong>
+                <div class="text-secondary" style="font-size:0.8rem;">
+                  Executed inside MySQL stored procedure with <code>SELECT ... FOR UPDATE</code> lock.
+                </div>
+              </div>
+              <button type="submit" class="btn-forest py-2 px-4" {% if not vehicles %}disabled{% endif %}>
+                Confirm Reservation &rarr;
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

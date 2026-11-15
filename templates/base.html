@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Smart Parking Slot Management System{% endblock %}</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap" rel="stylesheet">
+  
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  
+  <!-- Custom Design System -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <nav class="navbar-custom">
+    <div class="container-fluid d-flex justify-content-between align-items-center">
+      <a href="{{ url_for('index') }}" class="brand-badge">
+        <svg width="24" height="24" viewBox="0 0 24 24">
+          <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-6 8.5c0 .83-.67 1.5-1.5 1.5H9.5V8h2c.83 0 1.5.67 1.5 1.5v2zm2-2C15 8.12 13.88 7 12.5 7H8v10h1.5v-4H12c1.66 0 3-1.34 3-3z"/>
+        </svg>
+        <span>PARKSMART DBMS</span>
+      </a>
+
+      <div class="d-flex align-items-center gap-3">
+        <a href="{{ url_for('parking_availability') }}" class="nav-link-custom">Live Availability</a>
+        
+        {% if session.get('user_id') %}
+          <a href="{{ url_for('user_dashboard') }}" class="nav-link-custom">My Dashboard</a>
+          <a href="{{ url_for('user_vehicles') }}" class="nav-link-custom">Vehicles</a>
+          <a href="{{ url_for('user_booking_history') }}" class="nav-link-custom">Reservations</a>
+          <a href="{{ url_for('user_payments') }}" class="nav-link-custom">Payments</a>
+          <div class="dropdown">
+            <button class="btn btn-outline-forest dropdown-toggle py-1 px-3" type="button" data-bs-toggle="dropdown">
+              👤 {{ session.get('user_name', 'Driver') }} (₹{{ "%.2f"|format(session.get('wallet_balance', 0.0)) }})
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
+              <li><a class="dropdown-item" href="{{ url_for('user_dashboard') }}">Profile & Wallet</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item text-danger" href="{{ url_for('logout') }}">Sign Out</a></li>
+            </ul>
+          </div>
+        {% elif session.get('admin_id') %}
+          <a href="{{ url_for('admin_dashboard') }}" class="nav-link-custom">Admin Console</a>
+          <a href="{{ url_for('admin_parking_areas') }}" class="nav-link-custom">Areas</a>
+          <a href="{{ url_for('admin_parking_slots') }}" class="nav-link-custom">Slots</a>
+          <a href="{{ url_for('admin_analytics') }}" class="nav-link-custom">Analytics</a>
+          <a href="{{ url_for('admin_sql_demo') }}" class="nav-link-custom">DBMS Showcase</a>
+          <a href="{{ url_for('logout') }}" class="btn btn-outline-forest py-1 px-3">Logout (Admin)</a>
+        {% else %}
+          <a href="{{ url_for('login') }}" class="btn-outline-forest">Log In</a>
+          <a href="{{ url_for('register') }}" class="btn-forest">Get Started</a>
+          <a href="{{ url_for('admin_login') }}" class="nav-link-custom text-muted" style="font-size:0.8rem;">Admin Portal</a>
+        {% endif %}
+      </div>
+    </div>
+  </nav>
+
+  <!-- Flash Messaging -->
+  <div class="container mt-3">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert-custom alert-custom-{{ 'success' if category == 'success' else 'error' }}">
+            <span>{{ '✓' if category == 'success' else '⚠️' }}</span>
+            <div>{{ message }}</div>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+  </div>
+
+  <!-- Main Content Container -->
+  <main class="py-4">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Academic Footer -->
+  <footer class="mt-5 py-4 border-top" style="background-color: var(--bg-surface); border-color: var(--border-subtle) !important;">
+    <div class="container text-center">
+      <p class="mb-1 text-secondary" style="font-size: 0.9rem;">
+        <strong>Smart Parking Slot Management System</strong> — Database Management System (DBMS) Project
+      </p>
+      <p class="text-muted mb-0" style="font-size: 0.8rem;">
+        Built with Python Flask & MySQL (Normalized 3NF Architecture • Transactions • Stored Procedures • Triggers • Views)
+      </p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

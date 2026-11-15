@@ -1,0 +1,174 @@
+{% extends 'base.html' %}
+{% block title %}Revenue & Performance Analytics - Admin Console{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="serif-heading mb-1">Financial & Occupancy Analytics</h2>
+      <p class="text-secondary mb-0">Daily, weekly, and monthly trends calculated via MySQL aggregate functions.</p>
+    </div>
+    <div class="d-flex gap-2">
+      <button class="btn btn-outline-forest btn-sm" onclick="window.print()">Export Report</button>
+    </div>
+  </div>
+
+  <!-- Big Revenue Metrics Strip -->
+  <div class="row g-3 mb-4">
+    <div class="col-md-3 col-6">
+      <div class="custom-card">
+        <div class="card-label">Lifetime Settlement</div>
+        <div class="stat-value text-success">₹{{ "%.2f"|format(metrics.lifetime_rev) }}</div>
+        <small class="text-muted">Total settled transactions</small>
+      </div>
+    </div>
+    <div class="col-md-3 col-6">
+      <div class="custom-card">
+        <div class="card-label">Last 30 Days (Monthly)</div>
+        <div class="stat-value text-primary">₹{{ "%.2f"|format(metrics.month_rev) }}</div>
+        <small class="text-muted">Trailing monthly total</small>
+      </div>
+    </div>
+    <div class="col-md-3 col-6">
+      <div class="custom-card">
+        <div class="card-label">Today's Collections</div>
+        <div class="stat-value text-dark">₹{{ "%.2f"|format(metrics.today_rev) }}</div>
+        <small class="text-muted">Direct gate & wallet entries</small>
+      </div>
+    </div>
+    <div class="col-md-3 col-6">
+      <div class="custom-card">
+        <div class="card-label">Average Order Value</div>
+        <div class="stat-value">₹{{ "%.2f"|format(metrics.aov) }}</div>
+        <small class="text-muted">Per parking reservation</small>
+      </div>
+    </div>
+  </div>
+
+  <!-- Charts Row -->
+  <div class="row g-4 mb-4">
+    <div class="col-lg-8">
+      <div class="custom-card">
+        <h5 class="serif-heading mb-3">Daily Revenue Trend (Last 7 Days)</h5>
+        <div style="height: 280px;">
+          <canvas id="dailyRevenueChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-4">
+      <div class="custom-card">
+        <h5 class="serif-heading mb-3">Revenue by Settlement Method</h5>
+        <div style="height: 280px;">
+          <canvas id="paymentMethodChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Detailed Payment Audit Trail -->
+  <div class="custom-card">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h5 class="serif-heading mb-0">Live MySQL Payment Ledger</h5>
+      <span class="badge bg-light text-muted border">Queried from Payments Table</span>
+    </div>
+
+    <div class="table-responsive">
+      <table class="custom-table">
+        <thead>
+          <tr>
+            <th>Txn Reference</th>
+            <th>Customer Name</th>
+            <th>Type</th>
+            <th>Method</th>
+            <th>Amount</th>
+            <th>Status</th>
+            <th>Settled At</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in recent_payments %}
+          <tr>
+            <td><strong class="font-monospace text-secondary" style="font-size:0.82rem;">{{ p.transaction_reference }}</strong></td>
+            <td>
+              <strong>{{ p.full_name }}</strong>
+              <div class="text-muted" style="font-size:0.75rem;">{{ p.email }}</div>
+            </td>
+            <td>
+              {% if p.booking_code %}
+                <span class="font-monospace text-primary">{{ p.booking_code }}</span>
+              {% else %}
+                <span class="text-muted">Gate Session</span>
+              {% endif %}
+            </td>
+            <td><span class="badge bg-light text-dark border">{{ p.payment_method }}</span></td>
+            <td><strong class="text-success">₹{{ "%.2f"|format(p.amount) }}</strong></td>
+            <td>
+              {% if p.payment_status == 'SUCCESS' %}
+                <span class="badge bg-success">SUCCESS</span>
+              {% elif p.payment_status == 'REFUNDED' %}
+                <span class="badge bg-warning text-dark">REFUNDED</span>
+              {% endif %}
+            </td>
+            <td style="font-size:0.8rem;" class="text-muted">{{ p.paid_at }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Line chart daily revenue
+  new Chart(document.getElementById('dailyRevenueChart').getContext('2d'), {
+    type: 'line',
+    data: {
+      labels: {{ revenue_days|tojson }},
+      datasets: [{
+        label: 'Revenue (₹)',
+        data: {{ revenue_values|tojson }},
+        borderColor: '#245A44',
+        backgroundColor: 'rgba(36, 90, 68, 0.08)',
+        fill: true,
+        tension: 0.35,
+        borderWidth: 2,
+        pointBackgroundColor: '#245A44',
+        pointRadius: 4
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        y: { beginAtZero: true }
+      }
+    }
+  });
+
+  // Doughnut chart payment methods
+  new Chart(document.getElementById('paymentMethodChart').getContext('2d'), {
+    type: 'doughnut',
+    data: {
+      labels: {{ method_labels|tojson }},
+      datasets: [{
+        data: {{ method_values|tojson }},
+        backgroundColor: ['#245A44', '#3E7B62', '#F6AD55', '#4A5568', '#CBD5E0'],
+        borderWidth: 2,
+        borderColor: '#ffffff'
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'bottom' }
+      }
+    }
+  });
+});
+</script>
+{% endblock %}

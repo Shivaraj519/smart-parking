@@ -1,0 +1,158 @@
+{% extends 'base.html' %}
+{% block title %}Manage Parking Areas - Admin Console{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="serif-heading mb-1">Parking Area Management</h2>
+      <p class="text-secondary mb-0">Manage physical facilities, addresses, capacities, and operating statuses.</p>
+    </div>
+    <button class="btn-forest" data-bs-toggle="modal" data-bs-target="#addAreaModal">
+      + Add New Parking Facility
+    </button>
+  </div>
+
+  <div class="custom-card mb-4">
+    <div class="table-responsive">
+      <table class="custom-table">
+        <thead>
+          <tr>
+            <th>Area ID</th>
+            <th>Facility Name</th>
+            <th>Physical Address</th>
+            <th>Capacity</th>
+            <th>Operating Status</th>
+            <th>Created At</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for a in areas %}
+          <tr>
+            <td><strong class="font-monospace">#{{ a.area_id }}</strong></td>
+            <td><strong>{{ a.area_name }}</strong></td>
+            <td>{{ a.location_address }}</td>
+            <td>{{ a.total_capacity }} Bays</td>
+            <td>
+              {% if a.operating_status == 'OPEN' %}
+                <span class="badge bg-success">OPEN</span>
+              {% elif a.operating_status == 'CLOSED' %}
+                <span class="badge bg-danger">CLOSED</span>
+              {% else %}
+                <span class="badge bg-warning text-dark">MAINTENANCE</span>
+              {% endif %}
+            </td>
+            <td style="font-size:0.8rem;" class="text-muted">{{ a.created_at }}</td>
+            <td>
+              <button class="btn btn-outline-forest btn-sm py-0 px-2" style="font-size:0.78rem;" 
+                      onclick="editAreaModal('{{ a.area_id }}', '{{ a.area_name }}', '{{ a.location_address }}', '{{ a.total_capacity }}', '{{ a.operating_status }}')">
+                Edit
+              </button>
+              <form method="POST" action="{{ url_for('admin_delete_area', area_id=a.area_id) }}" onsubmit="return confirm('Delete facility {{ a.area_name }}? Note: Cascades to slots and pricing.');" class="d-inline">
+                <button type="submit" class="btn btn-outline-danger btn-sm py-0 px-2" style="font-size:0.78rem;">Delete</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Add Area Modal -->
+<div class="modal fade" id="addAreaModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content custom-card p-4">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="serif-heading mb-0">Add Parking Facility</h4>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <form method="POST" action="{{ url_for('admin_add_area') }}">
+        <div class="mb-3">
+          <label class="form-label text-secondary fw-semibold" style="font-size:0.85rem;">Facility Name</label>
+          <input type="text" name="area_name" class="form-control" placeholder="e.g. North Gateway Terminal" required>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label text-secondary fw-semibold" style="font-size:0.85rem;">Physical Address / Location</label>
+          <input type="text" name="location_address" class="form-control" placeholder="e.g. Ring Road, Outer Belt Hub" required>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label text-secondary fw-semibold" style="font-size:0.85rem;">Total Capacity (Bays)</label>
+          <input type="number" name="total_capacity" class="form-control" value="20" min="1" required>
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label text-secondary fw-semibold" style="font-size:0.85rem;">Operating Status</label>
+          <select name="operating_status" class="form-select">
+            <option value="OPEN">OPEN</option>
+            <option value="MAINTENANCE">MAINTENANCE</option>
+            <option value="CLOSED">CLOSED</option>
+          </select>
+        </div>
+
+        <button type="submit" class="btn-forest w-100 justify-content-center py-2">
+          Save Parking Facility
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Area Modal -->
+<div class="modal fade" id="editAreaModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content custom-card p-4">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="serif-heading mb-0">Edit Facility Details</h4>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <form method="POST" id="editAreaForm" action="">
+        <div class="mb-3">
+          <label class="form-label text-secondary fw-semibold" style="font-size:0.85rem;">Facility Name</label>
+          <input type="text" name="area_name" id="editAreaName" class="form-control" required>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label text-secondary fw-semibold" style="font-size:0.85rem;">Address</label>
+          <input type="text" name="location_address" id="editAreaAddress" class="form-control" required>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label text-secondary fw-semibold" style="font-size:0.85rem;">Total Capacity</label>
+          <input type="number" name="total_capacity" id="editAreaCapacity" class="form-control" min="1" required>
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label text-secondary fw-semibold" style="font-size:0.85rem;">Operating Status</label>
+          <select name="operating_status" id="editAreaStatus" class="form-select">
+            <option value="OPEN">OPEN</option>
+            <option value="MAINTENANCE">MAINTENANCE</option>
+            <option value="CLOSED">CLOSED</option>
+          </select>
+        </div>
+
+        <button type="submit" class="btn-forest w-100 justify-content-center py-2">Update Facility</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function editAreaModal(id, name, address, cap, status) {
+  document.getElementById('editAreaName').value = name;
+  document.getElementById('editAreaAddress').value = address;
+  document.getElementById('editAreaCapacity').value = cap;
+  document.getElementById('editAreaStatus').value = status;
+  document.getElementById('editAreaForm').action = `/admin/areas/edit/${id}`;
+  new bootstrap.Modal(document.getElementById('editAreaModal')).show();
+}
+</script>
+{% endblock %}

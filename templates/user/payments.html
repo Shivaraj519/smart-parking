@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% block title %}My Payment Records - ParkSmart{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="serif-heading mb-1">Financial Transactions & Payments</h2>
+      <p class="text-secondary mb-0">Immutable ledger records from MySQL <code>Payments</code> table.</p>
+    </div>
+    <div class="p-2 px-3 rounded custom-card" style="font-size:0.9rem;">
+      Active Balance: <strong class="text-success">₹{{ "%.2f"|format(session.get('wallet_balance', 0.0)) }}</strong>
+    </div>
+  </div>
+
+  <div class="custom-card">
+    {% if payments %}
+    <div class="table-responsive">
+      <table class="custom-table">
+        <thead>
+          <tr>
+            <th>Txn Reference</th>
+            <th>Type / Booking</th>
+            <th>Settlement Method</th>
+            <th>Amount Paid</th>
+            <th>Status</th>
+            <th>Timestamp</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in payments %}
+          <tr>
+            <td><strong class="font-monospace text-secondary" style="font-size:0.85rem;">{{ p.transaction_reference }}</strong></td>
+            <td>
+              {% if p.booking_code %}
+                <span class="font-monospace text-primary fw-bold">{{ p.booking_code }}</span>
+              {% elif p.session_id %}
+                <span>Session #{{ p.session_id }} (Overstay)</span>
+              {% else %}
+                <span>Wallet Top-Up</span>
+              {% endif %}
+            </td>
+            <td><span class="badge bg-light text-dark border">{{ p.payment_method }}</span></td>
+            <td><strong class="text-dark">₹{{ "%.2f"|format(p.amount) }}</strong></td>
+            <td>
+              {% if p.payment_status == 'SUCCESS' %}
+                <span class="badge bg-success">SUCCESS</span>
+              {% elif p.payment_status == 'REFUNDED' %}
+                <span class="badge bg-warning text-dark">REFUNDED</span>
+              {% else %}
+                <span class="badge bg-danger">{{ p.payment_status }}</span>
+              {% endif %}
+            </td>
+            <td style="font-size:0.8rem;" class="text-muted">{{ p.paid_at }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="text-center py-5 text-muted">
+      <p class="mb-0">No payment transaction records found.</p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

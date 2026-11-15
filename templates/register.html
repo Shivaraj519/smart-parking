@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% block title %}Create Driver Account - ParkSmart{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <div class="custom-card p-4 p-md-5">
+        <div class="text-center mb-4">
+          <h3 class="serif-heading mb-1">Create Driver Account</h3>
+          <p class="text-secondary mb-0">Join ParkSmart to instantly book slots and store vehicles</p>
+        </div>
+
+        <form method="POST" action="{{ url_for('register') }}">
+          <div class="mb-3">
+            <label class="form-label text-secondary fw-semibold" style="font-size:0.88rem;">Full Name</label>
+            <input type="text" name="full_name" class="form-control" placeholder="e.g. Ramesh Kumar" required value="{{ request.form.get('full_name', '') }}">
+          </div>
+
+          <div class="row g-2 mb-3">
+            <div class="col-md-6">
+              <label class="form-label text-secondary fw-semibold" style="font-size:0.88rem;">Email Address</label>
+              <input type="email" name="email" class="form-control" placeholder="ramesh@example.com" required value="{{ request.form.get('email', '') }}">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label text-secondary fw-semibold" style="font-size:0.88rem;">Phone Number</label>
+              <input type="tel" name="phone_number" class="form-control" placeholder="9876543210" required value="{{ request.form.get('phone_number', '') }}">
+            </div>
+          </div>
+
+          <div class="row g-2 mb-3">
+            <div class="col-md-6">
+              <label class="form-label text-secondary fw-semibold" style="font-size:0.88rem;">Driving License Number</label>
+              <input type="text" name="license_number" class="form-control" placeholder="KA01-20230009876" required value="{{ request.form.get('license_number', '') }}">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label text-secondary fw-semibold" style="font-size:0.88rem;">Initial Wallet Balance (₹)</label>
+              <input type="number" name="wallet_balance" class="form-control" value="500.00" min="0" step="10">
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label text-secondary fw-semibold" style="font-size:0.88rem;">Password</label>
+            <input type="password" name="password" class="form-control" placeholder="••••••••" required>
+          </div>
+
+          <button type="submit" class="btn-forest w-100 justify-content-center py-2 mb-3">
+            Register & Fund Wallet
+          </button>
+        </form>
+
+        <div class="text-center pt-3 border-top mt-2" style="font-size: 0.88rem;">
+          <span class="text-secondary">Already registered?</span>
+          <a href="{{ url_for('login') }}" class="text-decoration-none fw-semibold" style="color: var(--forest-green);">Sign in here</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

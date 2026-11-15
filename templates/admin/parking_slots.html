@@ -1,0 +1,184 @@
+{% extends 'base.html' %}
+{% block title %}Parking Slot Inventory - Admin Console{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="serif-heading mb-1">Parking Slot Management</h2>
+      <p class="text-secondary mb-0">Configure bays, floor levels, supported vehicle types, and EV chargers.</p>
+    </div>
+    <button class="btn-forest" data-bs-toggle="modal" data-bs-target="#addSlotModal">
+      + Create Parking Slot
+    </button>
+  </div>
+
+  <div class="custom-card mb-4">
+    <div class="table-responsive">
+      <table class="custom-table">
+        <thead>
+          <tr>
+            <th>Slot Bay ID</th>
+            <th>Facility</th>
+            <th>Floor Level</th>
+            <th>Supported Vehicle</th>
+            <th>EV Charger</th>
+            <th>Current Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for s in slots %}
+          <tr>
+            <td><strong class="font-monospace text-primary">{{ s.slot_number }}</strong></td>
+            <td><strong>{{ s.area_name }}</strong></td>
+            <td>{{ s.floor_level }}</td>
+            <td><span class="badge bg-light text-dark border">{{ s.supported_vehicle_type }}</span></td>
+            <td>
+              {% if s.is_ev_charging_equipped %}
+                <span class="badge bg-success">⚡ YES</span>
+              {% else %}
+                <span class="text-muted">No</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if s.slot_status == 'AVAILABLE' %}
+                <span class="badge badge-available">AVAILABLE</span>
+              {% elif s.slot_status == 'RESERVED' %}
+                <span class="badge badge-reserved">RESERVED</span>
+              {% elif s.slot_status == 'OCCUPIED' %}
+                <span class="badge badge-occupied">OCCUPIED</span>
+              {% else %}
+                <span class="badge bg-secondary">{{ s.slot_status }}</span>
+              {% endif %}
+            </td>
+            <td>
+              <button class="btn btn-outline-forest btn-sm py-0 px-2" style="font-size:0.78rem;"
+                      onclick="editSlotModal('{{ s.slot_id }}', '{{ s.slot_number }}', '{{ s.floor_level }}', '{{ s.supported_vehicle_type }}', '{{ s.slot_status }}', '{{ s.is_ev_charging_equipped }}')">
+                Edit
+              </button>
+              <form method="POST" action="{{ url_for('admin_delete_slot', slot_id=s.slot_id) }}" onsubmit="return confirm('Delete slot {{ s.slot_number }}? Note: Cannot be deleted if linked to active reservations.');" class="d-inline">
+                <button type="submit" class="btn btn-outline-danger btn-sm py-0 px-2" style="font-size:0.78rem;">Delete</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Add Slot Modal -->
+<div class="modal fade" id="addSlotModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content custom-card p-4">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="serif-heading mb-0">Create Parking Slot</h4>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <form method="POST" action="{{ url_for('admin_add_slot') }}">
+        <div class="mb-3">
+          <label class="form-label text-secondary fw-semibold" style="font-size:0.85rem;">Facility Location</label>
+          <select name="area_id" class="form-select" required>
+            {% for a in areas %}
+            <option value="{{ a.area_id }}">{{ a.area_name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label text-secondary fw-semibold" style="font-size:0.85rem;">Slot Number / Identifier</label>
+          <input type="text" name="slot_number" class="form-control font-monospace text-uppercase" placeholder="e.g. TP-A16" required>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label text-secondary fw-semibold" style="font-size:0.85rem;">Floor / Level</label>
+          <input type="text" name="floor_level" class="form-control" placeholder="Ground Floor / Level 1 / Basement 1" value="Ground Floor">
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label text-secondary fw-semibold" style="font-size:0.85rem;">Vehicle Category</label>
+          <select name="supported_vehicle_type" class="form-select" required>
+            <option value="SEDAN">SEDAN</option>
+            <option value="SUV">SUV</option>
+            <option value="TWO_WHEELER">TWO_WHEELER</option>
+            <option value="ELECTRIC_VEHICLE">ELECTRIC_VEHICLE</option>
+            <option value="TRUCK">TRUCK</option>
+          </select>
+        </div>
+
+        <div class="mb-4 form-check">
+          <input type="checkbox" name="is_ev_charging_equipped" class="form-check-input" id="checkEV">
+          <label class="form-check-label" for="checkEV">Equipped with EV Fast Charging Dock</label>
+        </div>
+
+        <button type="submit" class="btn-forest w-100 justify-content-center py-2">
+          Save Slot to Database
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Slot Modal -->
+<div class="modal fade" id="editSlotModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content custom-card p-4">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="serif-heading mb-0">Modify Slot Bay</h4>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <form method="POST" id="editSlotForm" action="">
+        <div class="mb-3">
+          <label class="form-label text-secondary fw-semibold" style="font-size:0.85rem;">Slot Identifier</label>
+          <input type="text" name="slot_number" id="editSlotNum" class="form-control font-monospace" required>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label text-secondary fw-semibold" style="font-size:0.85rem;">Floor Level</label>
+          <input type="text" name="floor_level" id="editSlotFloor" class="form-control" required>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label text-secondary fw-semibold" style="font-size:0.85rem;">Category</label>
+          <select name="supported_vehicle_type" id="editSlotType" class="form-select">
+            <option value="SEDAN">SEDAN</option>
+            <option value="SUV">SUV</option>
+            <option value="TWO_WHEELER">TWO_WHEELER</option>
+            <option value="ELECTRIC_VEHICLE">ELECTRIC_VEHICLE</option>
+            <option value="TRUCK">TRUCK</option>
+          </select>
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label text-secondary fw-semibold" style="font-size:0.85rem;">Manual State Override</label>
+          <select name="slot_status" id="editSlotStatus" class="form-select">
+            <option value="AVAILABLE">AVAILABLE</option>
+            <option value="RESERVED">RESERVED</option>
+            <option value="OCCUPIED">OCCUPIED</option>
+            <option value="UNDER_MAINTENANCE">UNDER_MAINTENANCE</option>
+          </select>
+        </div>
+
+        <button type="submit" class="btn-forest w-100 justify-content-center py-2">Update Slot</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function editSlotModal(id, num, floor, type, status, ev) {
+  document.getElementById('editSlotNum').value = num;
+  document.getElementById('editSlotFloor').value = floor;
+  document.getElementById('editSlotType').value = type;
+  document.getElementById('editSlotStatus').value = status;
+  document.getElementById('editSlotForm').action = `/admin/slots/edit/${id}`;
+  new bootstrap.Modal(document.getElementById('editSlotModal')).show();
+}
+</script>
+{% endblock %}

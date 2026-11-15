@@ -1,0 +1,202 @@
+{% extends 'base.html' %}
+{% block title %}DBMS Concepts Showcase - ParkSmart Engine{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <span class="badge mb-1 px-3 py-1" style="background-color: var(--forest-green-light); color: var(--forest-green);">ACADEMIC CURRICULUM VERIFICATION</span>
+      <h2 class="serif-heading mb-1">DBMS & SQL Demonstration Laboratory</h2>
+      <p class="text-secondary mb-0">Live interactive execution of fundamental and advanced relational database concepts.</p>
+    </div>
+    <span class="badge bg-dark px-3 py-2 font-monospace">Active Driver: {{ db_driver }}</span>
+  </div>
+
+  <!-- Concept Navigation Cards -->
+  <div class="row g-4">
+    <!-- Concept 1: Aggregate Functions & GROUP BY / HAVING -->
+    <div class="col-lg-6">
+      <div class="custom-card h-100">
+        <h5 class="serif-heading mb-1 text-primary">1. GROUP BY, HAVING & Aggregate Functions</h5>
+        <p class="text-secondary" style="font-size:0.85rem;">
+          Groups parking slots by facility and vehicle type, calculates slot totals, and filters only groups with capacity &ge; 2 via <code>HAVING</code>.
+        </p>
+        
+        <div class="sql-query-card mb-3">
+          <span class="sql-keyword">SELECT</span> pa.area_name, ps.supported_vehicle_type,<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="sql-func">COUNT</span>(ps.slot_id) <span class="sql-keyword">AS</span> total_slots,<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="sql-func">SUM</span>(<span class="sql-keyword">CASE WHEN</span> ps.slot_status = <span class="sql-str">'AVAILABLE'</span> <span class="sql-keyword">THEN</span> 1 <span class="sql-keyword">ELSE</span> 0 <span class="sql-keyword">END</span>) <span class="sql-keyword">AS</span> free_slots<br>
+          <span class="sql-keyword">FROM</span> Parking_Areas pa<br>
+          <span class="sql-keyword">INNER JOIN</span> Parking_Slots ps <span class="sql-keyword">ON</span> pa.area_id = ps.area_id<br>
+          <span class="sql-keyword">GROUP BY</span> pa.area_name, ps.supported_vehicle_type<br>
+          <span class="sql-keyword">HAVING</span> total_slots &gt;= 2<br>
+          <span class="sql-keyword">ORDER BY</span> total_slots <span class="sql-keyword">DESC</span>;
+        </div>
+
+        <h6 class="fw-bold" style="font-size:0.8rem;">Live Query Output (Direct Database Execution):</h6>
+        <div class="table-responsive">
+          <table class="custom-table" style="font-size:0.82rem;">
+            <thead>
+              <tr>
+                <th>Area Name</th>
+                <th>Vehicle Type</th>
+                <th>Total Slots (COUNT)</th>
+                <th>Free Slots (SUM)</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in demo_groupby %}
+              <tr>
+                <td>{{ row.area_name }}</td>
+                <td><span class="badge bg-light text-dark border">{{ row.supported_vehicle_type }}</span></td>
+                <td><strong>{{ row.total_slots }}</strong></td>
+                <td><span class="text-success fw-bold">{{ row.free_slots }}</span></td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Concept 2: Multi-Table Relational JOINs (INNER & LEFT JOIN) -->
+    <div class="col-lg-6">
+      <div class="custom-card h-100">
+        <h5 class="serif-heading mb-1 text-primary">2. Multi-Table Relational JOINs</h5>
+        <p class="text-secondary" style="font-size:0.85rem;">
+          Demonstrating <code>INNER JOIN</code> across Users, Vehicles, Reservations, Slots, and Areas with dynamic tariff calculation.
+        </p>
+
+        <div class="sql-query-card mb-3">
+          <span class="sql-keyword">SELECT</span> u.full_name, v.license_plate, r.booking_code,<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pa.area_name, s.slot_number, r.estimated_cost<br>
+          <span class="sql-keyword">FROM</span> Reservations r<br>
+          <span class="sql-keyword">INNER JOIN</span> Users u <span class="sql-keyword">ON</span> r.user_id = u.user_id<br>
+          <span class="sql-keyword">INNER JOIN</span> Vehicles v <span class="sql-keyword">ON</span> r.vehicle_id = v.vehicle_id<br>
+          <span class="sql-keyword">INNER JOIN</span> Parking_Slots s <span class="sql-keyword">ON</span> r.slot_id = s.slot_id<br>
+          <span class="sql-keyword">INNER JOIN</span> Parking_Areas pa <span class="sql-keyword">ON</span> s.area_id = pa.area_id<br>
+          <span class="sql-keyword">WHERE</span> r.booking_status <span class="sql-keyword">IN</span> (<span class="sql-str">'CONFIRMED'</span>, <span class="sql-str">'CHECKED_IN'</span>)<br>
+          <span class="sql-keyword">LIMIT</span> 5;
+        </div>
+
+        <h6 class="fw-bold" style="font-size:0.8rem;">Live Query Output (Active JOIN Result):</h6>
+        <div class="table-responsive">
+          <table class="custom-table" style="font-size:0.82rem;">
+            <thead>
+              <tr>
+                <th>Driver</th>
+                <th>Plate</th>
+                <th>Pass Code</th>
+                <th>Facility & Bay</th>
+                <th>Fee</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in demo_joins %}
+              <tr>
+                <td><strong>{{ row.full_name }}</strong></td>
+                <td><span class="font-monospace">{{ row.license_plate }}</span></td>
+                <td><span class="text-primary font-monospace">{{ row.booking_code }}</span></td>
+                <td>{{ row.slot_number }} ({{ row.area_name.split()[0] }})</td>
+                <td><strong>₹{{ row.estimated_cost }}</strong></td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Concept 3: Subqueries (Correlated & Scalar Subqueries) -->
+    <div class="col-lg-6">
+      <div class="custom-card h-100">
+        <h5 class="serif-heading mb-1 text-primary">3. Subqueries (Nested & Correlated)</h5>
+        <p class="text-secondary" style="font-size:0.85rem;">
+          Finds drivers whose cumulative spending exceeds the overall average user expenditure using a nested subquery.
+        </p>
+
+        <div class="sql-query-card mb-3">
+          <span class="sql-keyword">SELECT</span> u.user_id, u.full_name, u.email,<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="sql-keyword">SELECT</span> <span class="sql-func">COALESCE</span>(<span class="sql-func">SUM</span>(amount), 0) <span class="sql-keyword">FROM</span> Payments p <span class="sql-keyword">WHERE</span> p.user_id = u.user_id) <span class="sql-keyword">AS</span> total_spent<br>
+          <span class="sql-keyword">FROM</span> Users u<br>
+          <span class="sql-keyword">WHERE</span> (<span class="sql-keyword">SELECT</span> <span class="sql-func">COALESCE</span>(<span class="sql-func">SUM</span>(amount), 0) <span class="sql-keyword">FROM</span> Payments p <span class="sql-keyword">WHERE</span> p.user_id = u.user_id) &gt;<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="sql-keyword">SELECT</span> <span class="sql-func">AVG</span>(amount) <span class="sql-keyword">FROM</span> Payments)<br>
+          <span class="sql-keyword">ORDER BY</span> total_spent <span class="sql-keyword">DESC</span>;
+        </div>
+
+        <h6 class="fw-bold" style="font-size:0.8rem;">Live Query Output (High Spender Cohort):</h6>
+        <div class="table-responsive">
+          <table class="custom-table" style="font-size:0.82rem;">
+            <thead>
+              <tr>
+                <th>User ID</th>
+                <th>Full Name</th>
+                <th>Email</th>
+                <th>Total Spent (Subquery)</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in demo_subquery %}
+              <tr>
+                <td>#{{ row.user_id }}</td>
+                <td><strong>{{ row.full_name }}</strong></td>
+                <td>{{ row.email }}</td>
+                <td><strong class="text-success">₹{{ "%.2f"|format(row.total_spent) }}</strong></td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Concept 4: Database Views, Triggers & Transactions -->
+    <div class="col-lg-6">
+      <div class="custom-card h-100">
+        <h5 class="serif-heading mb-1 text-primary">4. Views, ACID Transactions & Triggers</h5>
+        <p class="text-secondary" style="font-size:0.85rem;">
+          Summarizing data through predefined SQL View <code>view_available_slots_summary</code> and automated triggers.
+        </p>
+
+        <div class="sql-query-card mb-3">
+          <span class="sql-keyword">SELECT</span> area_name, supported_vehicle_type, total_slots,<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;available_slots, occupied_slots, base_hourly_rate<br>
+          <span class="sql-keyword">FROM</span> view_available_slots_summary<br>
+          <span class="sql-keyword">WHERE</span> available_slots &gt; 0<br>
+          <span class="sql-keyword">LIMIT</span> 5;
+        </div>
+
+        <h6 class="fw-bold" style="font-size:0.8rem;">Live View Output (Direct from Database View):</h6>
+        <div class="table-responsive">
+          <table class="custom-table" style="font-size:0.82rem;">
+            <thead>
+              <tr>
+                <th>Area Name</th>
+                <th>Category</th>
+                <th>Available</th>
+                <th>Occupied</th>
+                <th>Base Rate</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in demo_views %}
+              <tr>
+                <td><strong>{{ row.area_name }}</strong></td>
+                <td>{{ row.supported_vehicle_type }}</td>
+                <td><span class="badge badge-available">{{ row.available_slots }}</span></td>
+                <td><span class="badge badge-occupied">{{ row.occupied_slots }}</span></td>
+                <td>₹{{ row.base_hourly_rate }}/hr</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="p-2 mt-3 rounded" style="background-color: var(--bg-card-subtle); font-size:0.78rem;">
+          <strong>ACID Trigger Verification:</strong> Slot status is automatically synchronized via triggers <code>trg_after_reservation_insert</code> and <code>trg_after_session_insert</code>, guaranteeing zero inconsistent states.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

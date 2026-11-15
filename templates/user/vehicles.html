@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+{% block title %}My Vehicles - ParkSmart{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="serif-heading mb-1">Vehicle Management</h2>
+      <p class="text-secondary mb-0">Register and manage multiple vehicles for parking reservations.</p>
+    </div>
+    <button class="btn-forest" data-bs-toggle="modal" data-bs-target="#addVehicleModal">
+      + Register New Vehicle
+    </button>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-8">
+      <div class="custom-card">
+        <h5 class="serif-heading mb-3">Enrolled Vehicles</h5>
+        {% if vehicles %}
+        <div class="table-responsive">
+          <table class="custom-table">
+            <thead>
+              <tr>
+                <th>License Plate</th>
+                <th>Category</th>
+                <th>Make & Model</th>
+                <th>Color</th>
+                <th>Enrolled Date</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for v in vehicles %}
+              <tr>
+                <td><strong class="font-monospace text-dark">{{ v.license_plate }}</strong></td>
+                <td>
+                  <span class="badge bg-secondary" style="font-size:0.75rem;">{{ v.vehicle_type }}</span>
+                </td>
+                <td>{{ v.make_model or '—' }}</td>
+                <td>{{ v.color or '—' }}</td>
+                <td style="font-size:0.8rem;" class="text-muted">{{ v.created_at }}</td>
+                <td>
+                  <form method="POST" action="{{ url_for('user_delete_vehicle', vehicle_id=v.vehicle_id) }}" onsubmit="return confirm('Remove vehicle {{ v.license_plate }}? Note: Cannot be deleted if active bookings exist.');" class="d-inline">
+                    <button type="submit" class="btn btn-outline-danger btn-sm py-0 px-2" style="font-size:0.78rem;">Delete</button>
+                  </form>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5 text-muted">
+          <p class="mb-3">No vehicles registered yet. Register your car or bike to begin reserving parking slots.</p>
+          <button class="btn-forest btn-sm" data-bs-toggle="modal" data-bs-target="#addVehicleModal">+ Register First Vehicle</button>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="col-lg-4">
+      <div class="custom-card">
+        <h5 class="serif-heading mb-2">Relational Integrity Notice</h5>
+        <p class="text-secondary" style="font-size:0.85rem;">
+          In our MySQL schema, the <code>Vehicles</code> table enforces a foreign key reference to <code>Users(user_id)</code> with <code>ON DELETE CASCADE</code>, and is referenced by <code>Reservations(vehicle_id)</code> with <code>ON DELETE RESTRICT</code>.
+        </p>
+        <div class="p-3 rounded" style="background-color: var(--bg-card-subtle); font-size:0.82rem;">
+          <strong>Supported Vehicle Types:</strong>
+          <ul class="mb-0 mt-2 ps-3 text-secondary">
+            <li><code>TWO_WHEELER</code> (Bikes & Scooters)</li>
+            <li><code>SEDAN</code> (Compact & Mid-size Cars)</li>
+            <li><code>SUV</code> (Large Cars & Crossovers)</li>
+            <li><code>ELECTRIC_VEHICLE</code> (EV Fast-Charge bays)</li>
+            <li><code>TRUCK</code> (Heavy commercial transport)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add Vehicle Modal -->
+<div class="modal fade" id="addVehicleModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content custom-card p-4">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="serif-heading mb-0">Register New Vehicle</h4>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <form method="POST" action="{{ url_for('user_add_vehicle') }}">
+        <div class="mb-3">
+          <label class="form-label text-secondary fw-semibold" style="font-size:0.85rem;">License Plate Number</label>
+          <input type="text" name="license_plate" class="form-control font-monospace text-uppercase" placeholder="KA01MH1234" required>
+          <small class="text-muted">Must be unique across the entire database.</small>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label text-secondary fw-semibold" style="font-size:0.85rem;">Vehicle Category</label>
+          <select name="vehicle_type" class="form-select" required>
+            <option value="SEDAN">Sedan</option>
+            <option value="SUV">SUV</option>
+            <option value="TWO_WHEELER">Two Wheeler (Bike/Scooter)</option>
+            <option value="ELECTRIC_VEHICLE">Electric Vehicle (EV)</option>
+            <option value="TRUCK">Truck / Commercial</option>
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label text-secondary fw-semibold" style="font-size:0.85rem;">Make & Model</label>
+          <input type="text" name="make_model" class="form-control" placeholder="e.g. Honda City / Tata Nexon">
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label text-secondary fw-semibold" style="font-size:0.85rem;">Vehicle Color</label>
+          <input type="text" name="color" class="form-control" placeholder="e.g. Pearl White / Metallic Grey">
+        </div>
+
+        <button type="submit" class="btn-forest w-100 justify-content-center py-2">
+          Save Vehicle to Database
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

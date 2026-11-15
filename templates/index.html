@@ -1,0 +1,129 @@
+{% extends 'base.html' %}
+{% block title %}ParkSmart - Relational Smart Parking Platform{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <!-- Hero Section -->
+  <div class="row align-items-center mb-5 pb-4">
+    <div class="col-lg-7">
+      <div class="badge px-3 py-1 mb-3" style="background-color: var(--forest-green-light); color: var(--forest-green); font-weight:600; font-size:0.85rem; border-radius: 20px;">
+        ENGINEERING DBMS MINI-PROJECT
+      </div>
+      <h1 class="serif-heading display-4 mb-3" style="color: var(--text-primary); line-height: 1.15;">
+        Intelligent Parking Slot Management with Real-Time MySQL Concurrency
+      </h1>
+      <p class="lead text-secondary mb-4" style="font-size: 1.15rem;">
+        A high-performance DBMS academic system demonstrating ACID transactions, stored procedures, triggers, normalized schemas (1NF-3NF), and sub-second slot allocation without double booking.
+      </p>
+      <div class="d-flex gap-3">
+        <a href="{{ url_for('parking_availability') }}" class="btn-forest">
+          Explore Live Availability &rarr;
+        </a>
+        <a href="{{ url_for('login') }}" class="btn-outline-forest">
+          User Login
+        </a>
+        <a href="{{ url_for('admin_login') }}" class="btn-outline-forest">
+          Admin Portal
+        </a>
+      </div>
+    </div>
+    <div class="col-lg-5 mt-4 mt-lg-0">
+      <div class="custom-card p-4" style="background: linear-gradient(145deg, #ffffff, #f7f4ec); border: 1px solid var(--border-strong);">
+        <h5 class="serif-heading mb-3" style="color: var(--forest-green);">DBMS Architectural Highlights</h5>
+        <ul class="list-unstyled mb-0" style="font-size: 0.92rem;">
+          <li class="mb-2 d-flex align-items-center gap-2">
+            <span class="text-success fw-bold">✓</span>
+            <span><strong>3NF Normalized Tables:</strong> Zero data anomalies across 9 interconnected entities.</span>
+          </li>
+          <li class="mb-2 d-flex align-items-center gap-2">
+            <span class="text-success fw-bold">✓</span>
+            <span><strong>Double-Booking Prevention:</strong> <code>SELECT ... FOR UPDATE</code> concurrency control.</span>
+          </li>
+          <li class="mb-2 d-flex align-items-center gap-2">
+            <span class="text-success fw-bold">✓</span>
+            <span><strong>Automated Triggers:</strong> Dynamic status flipping & audit tracking.</span>
+          </li>
+          <li class="mb-2 d-flex align-items-center gap-2">
+            <span class="text-success fw-bold">✓</span>
+            <span><strong>Stored Procedures:</strong> Parameterized transactional reservation & checkout.</span>
+          </li>
+          <li class="d-flex align-items-center gap-2">
+            <span class="text-success fw-bold">✓</span>
+            <span><strong>SQL Showcase:</strong> Live demonstrations of JOINs, GROUP BY, HAVING & Subqueries.</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Real-Time Metrics Strip (Direct SQL count queries) -->
+  <div class="row g-3 mb-5">
+    <div class="col-md-3 col-6">
+      <div class="custom-card">
+        <div class="card-label">Total Parking Slots</div>
+        <div class="stat-value">{{ stats.total_slots }}</div>
+        <small class="text-muted">Across {{ stats.total_areas }} prime locations</small>
+      </div>
+    </div>
+    <div class="col-md-3 col-6">
+      <div class="custom-card">
+        <div class="card-label">Available Right Now</div>
+        <div class="stat-value text-success">{{ stats.available_slots }}</div>
+        <small class="text-muted">Ready for instant reservation</small>
+      </div>
+    </div>
+    <div class="col-md-3 col-6">
+      <div class="custom-card">
+        <div class="card-label">Occupied / In Session</div>
+        <div class="stat-value text-danger">{{ stats.occupied_slots }}</div>
+        <small class="text-muted">Active vehicles parked</small>
+      </div>
+    </div>
+    <div class="col-md-3 col-6">
+      <div class="custom-card">
+        <div class="card-label">Registered Drivers</div>
+        <div class="stat-value text-primary">{{ stats.registered_users }}</div>
+        <small class="text-muted">{{ stats.registered_vehicles }} vehicles enrolled</small>
+      </div>
+    </div>
+  </div>
+
+  <!-- Parking Facilities Preview -->
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+      <h3 class="serif-heading mb-1">Our Managed Parking Facilities</h3>
+      <p class="text-secondary mb-0">Multi-level capacity, EV fast-chargers, and dynamic pricing tariffs.</p>
+    </div>
+    <a href="{{ url_for('parking_availability') }}" class="btn-outline-forest py-1 px-3" style="font-size:0.88rem;">View All Slots</a>
+  </div>
+
+  <div class="row g-4 mb-5">
+    {% for area in areas %}
+    <div class="col-md-4">
+      <div class="custom-card h-100 d-flex flex-column justify-content-between">
+        <div>
+          <div class="d-flex justify-content-between align-items-start mb-2">
+            <h5 class="fw-bold mb-0">{{ area.area_name }}</h5>
+            <span class="badge bg-success" style="font-size:0.75rem;">{{ area.operating_status }}</span>
+          </div>
+          <p class="text-muted mb-3" style="font-size:0.86rem;">📍 {{ area.location_address }}</p>
+          <div class="p-2 mb-3 rounded" style="background-color: var(--bg-card-subtle); font-size:0.85rem;">
+            <div class="d-flex justify-content-between mb-1">
+              <span>Total Capacity:</span>
+              <strong>{{ area.total_capacity }} Bays</strong>
+            </div>
+            <div class="d-flex justify-content-between">
+              <span>Available Bays:</span>
+              <strong class="text-success">{{ area.available_count }} Free</strong>
+            </div>
+          </div>
+        </div>
+        <a href="{{ url_for('parking_availability') }}?area_id={{ area.area_id }}" class="btn-outline-forest w-100 text-center">
+          Reserve Bay in {{ area.area_name.split()[0] }} &rarr;
+        </a>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

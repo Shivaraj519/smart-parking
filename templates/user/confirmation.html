@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% block title %}Reservation Confirmation - ParkSmart{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-7">
+      <div class="custom-card p-4 p-md-5 text-center" style="border-top: 5px solid var(--forest-green);">
+        <div class="mb-3">
+          <div class="d-inline-flex align-items-center justify-content-center rounded-circle" style="width: 64px; height: 64px; background-color: var(--forest-green-light); color: var(--forest-green); font-size: 2rem;">
+            ✓
+          </div>
+        </div>
+        <h2 class="serif-heading mb-1">Reservation Confirmed!</h2>
+        <p class="text-secondary mb-4">Your parking bay has been reserved and registered in MySQL.</p>
+
+        <!-- Booking Pass Card -->
+        <div class="p-4 rounded text-start mb-4" style="background-color: var(--bg-card-subtle); border: 2px dashed var(--border-strong);">
+          <div class="d-flex justify-content-between align-items-start border-bottom pb-3 mb-3">
+            <div>
+              <span class="text-muted" style="font-size:0.75rem;">BOOKING PASS CODE</span>
+              <div class="display-6 fw-bold font-monospace text-primary">{{ res.booking_code }}</div>
+            </div>
+            <div class="text-end">
+              <span class="badge badge-reserved px-3 py-1">{{ res.booking_status }}</span>
+            </div>
+          </div>
+
+          <div class="row g-3" style="font-size: 0.9rem;">
+            <div class="col-6">
+              <span class="text-muted d-block">Facility:</span>
+              <strong>{{ res.area_name }}</strong>
+            </div>
+            <div class="col-6">
+              <span class="text-muted d-block">Assigned Slot:</span>
+              <strong class="font-monospace">{{ res.slot_number }} ({{ res.floor_level }})</strong>
+            </div>
+            <div class="col-6">
+              <span class="text-muted d-block">Registered Vehicle:</span>
+              <strong>{{ res.license_plate }}</strong>
+            </div>
+            <div class="col-6">
+              <span class="text-muted d-block">Vehicle Type:</span>
+              <span>{{ res.vehicle_type }}</span>
+            </div>
+            <div class="col-6">
+              <span class="text-muted d-block">Start Time:</span>
+              <span>{{ res.start_time }}</span>
+            </div>
+            <div class="col-6">
+              <span class="text-muted d-block">End Time:</span>
+              <span>{{ res.end_time }}</span>
+            </div>
+            <div class="col-6">
+              <span class="text-muted d-block">Paid Amount:</span>
+              <strong class="text-success">₹{{ "%.2f"|format(res.estimated_cost) }}</strong>
+            </div>
+            <div class="col-6">
+              <span class="text-muted d-block">Payment Method:</span>
+              <span>{{ payment.payment_method if payment else 'WALLET' }} (Settled)</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="d-flex gap-3 justify-content-center">
+          <a href="{{ url_for('user_dashboard') }}" class="btn-forest">Go to Dashboard</a>
+          <button onclick="window.print()" class="btn-outline-forest">Print Pass</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

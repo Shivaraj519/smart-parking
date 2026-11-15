@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% block title %}Reservation History - ParkSmart{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="serif-heading mb-1">Reservation History</h2>
+      <p class="text-secondary mb-0">Complete historical audit trail of your parking reservations.</p>
+    </div>
+    <a href="{{ url_for('parking_availability') }}" class="btn-forest btn-sm">+ New Reservation</a>
+  </div>
+
+  <div class="custom-card">
+    {% if reservations %}
+    <div class="table-responsive">
+      <table class="custom-table">
+        <thead>
+          <tr>
+            <th>Booking Code</th>
+            <th>Facility</th>
+            <th>Slot Bay</th>
+            <th>Vehicle Plate</th>
+            <th>Window</th>
+            <th>Amount</th>
+            <th>Status</th>
+            <th>Booked At</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in reservations %}
+          <tr>
+            <td><strong class="font-monospace text-primary">{{ r.booking_code }}</strong></td>
+            <td>{{ r.area_name }}</td>
+            <td><strong class="font-monospace">{{ r.slot_number }}</strong></td>
+            <td><strong>{{ r.license_plate }}</strong></td>
+            <td style="font-size:0.8rem;">
+              <div>{{ r.start_time }}</div>
+              <div class="text-muted">to {{ r.end_time }}</div>
+            </td>
+            <td><strong>₹{{ "%.2f"|format(r.estimated_cost) }}</strong></td>
+            <td>
+              {% if r.booking_status == 'CONFIRMED' %}
+                <span class="badge badge-reserved">CONFIRMED</span>
+              {% elif r.booking_status == 'CHECKED_IN' %}
+                <span class="badge badge-occupied">CHECKED-IN</span>
+              {% elif r.booking_status == 'COMPLETED' %}
+                <span class="badge bg-secondary">COMPLETED</span>
+              {% elif r.booking_status == 'CANCELLED' %}
+                <span class="badge bg-light text-muted border">CANCELLED</span>
+              {% endif %}
+            </td>
+            <td style="font-size:0.78rem;" class="text-muted">{{ r.created_at }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="text-center py-5 text-muted">
+      <p class="mb-2">No historical reservations found for your driver account.</p>
+      <a href="{{ url_for('parking_availability') }}" class="btn-forest btn-sm">Make First Reservation</a>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
