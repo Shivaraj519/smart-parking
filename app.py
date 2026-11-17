@@ -34,10 +34,20 @@ def admin_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+def watchman_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not session.get('watchman_id') and not session.get('admin_id'):
+            flash('Watchman authentication required.', 'error')
+            return redirect(url_for('watchman_login', next=request.url))
+        return f(*args, **kwargs)
+    return decorated_function
+
 @app.before_request
 def load_current_user_context():
     g.user = None
     g.admin = None
+    g.watchman = None
     if session.get('user_id'):
         user = database.execute_query(
             "SELECT user_id, full_name, email, phone_number, license_number, wallet_balance FROM Users WHERE user_id = %s",
@@ -55,6 +65,14 @@ def load_current_user_context():
         )
         if admin:
             g.admin = admin
+    elif session.get('watchman_id'):
+        watchman = database.execute_query(
+            "SELECT admin_id, username, full_name, email, role FROM Admins WHERE admin_id = %s",
+            (session['watchman_id'],),
+            fetch_one=True
+        )
+        if watchman:
+            g.watchman = watchman
 
 # ---------------------------------------------------------------------
 # PUBLIC ROUTES
@@ -212,6 +230,154 @@ def admin_login():
             flash('Invalid admin credentials. Demo: admin / admin123', 'error')
 
     return render_template('admin_login.html')
+
+@app.route('/find-my-car')
+def find_my_car():
+    search_query = request.args.get('search_query', '').strip().upper()
+    vehicle_location = None
+
+    if search_query:
+        # Search active sessions first by license plate or booking code
+        vehicle_location = database.execute_query("""
+            SELECT s.session_id, s.entry_time, v.license_plate, v.make_model, v.vehicle_type,
+                   sl.slot_number, sl.floor_level, sl.section, sl.row_num, pa.area_name
+            FROM Parking_Sessions s
+            JOIN Parking_Slots sl ON s.slot_id = sl.slot_id
+            JOIN Parking_Areas pa ON sl.area_id = pa.area_id
+            JOIN Vehicles v ON s.vehicle_id = v.vehicle_id
+            LEFT JOIN Reservations r ON s.reservation_id = r.reservation_id
+            WHERE s.session_status = 'ACTIVE'
+              AND (v.license_plate = %s OR r.booking_code = %s)
+            LIMIT 1;
+        """, (search_query, search_query), fetch_one=True)
+
+        if vehicle_location:
+            # Calculate duration in minutes
+            now = datetime.datetime.now()
+            entry_dt = datetime.datetime.fromisoformat(str(vehicle_location['entry_time']).replace(' ', 'T'))
+            vehicle_location['duration_mins'] = max(1, int((now - entry_dt).total_seconds() / 60))
+
+    return render_template('user/find_my_car.html', 
+                           search_query=search_query, 
+                           vehicle_location=vehicle_location)
+
+@app.route('/watchman/login', methods=['GET', 'POST'])
+def watchman_login():
+    if request.method == 'POST':
+        username = request.form.get('username', '').strip()
+        pwd = request.form.get('password', '')
+
+        watchman = database.execute_query(
+            "SELECT * FROM Admins WHERE username = %s OR email = %s",
+            (username, username),
+            fetch_one=True
+        )
+
+        if watchman and check_password_hash(watchman['password_hash'], pwd):
+            session.clear()
+            session['watchman_id'] = watchman['admin_id']
+            session['watchman_name'] = watchman['full_name']
+            session['watchman_role'] = watchman['role']
+            flash(f"Gate Barrier Terminal Active. Welcome {watchman['full_name']}.", 'success')
+            return redirect(url_for('watchman_dashboard'))
+        else:
+            flash('Invalid watchman credentials. Demo: watchman / watchman123', 'error')
+
+    return render_template('watchman_login.html')
+
+@app.route('/watchman/dashboard')
+@watchman_required
+def watchman_dashboard():
+    tot_slots = database.execute_query("SELECT COUNT(*) AS c FROM Parking_Slots", fetch_one=True)['c']
+    avail_slots = database.execute_query("SELECT COUNT(*) AS c FROM Parking_Slots WHERE slot_status = 'AVAILABLE'", fetch_one=True)['c']
+    occ_slots = database.execute_query("SELECT COUNT(*) AS c FROM Parking_Slots WHERE slot_status = 'OCCUPIED'", fetch_one=True)['c']
+
+    stats = {
+        'total_slots': tot_slots,
+        'available_slots': avail_slots,
+        'occupied_slots': occ_slots
+    }
+
+    active_sessions = database.execute_query("""
+        SELECT s.session_id, s.entry_time, s.slot_id, s.vehicle_id,
+               v.license_plate, v.vehicle_type, u.full_name AS driver_name, u.phone_number,
+               sl.slot_number, pa.area_name,
+               COALESCE(pr.base_hourly_rate, 50.0) AS base_hourly_rate
+        FROM Parking_Sessions s
+        JOIN Parking_Slots sl ON s.slot_id = sl.slot_id
+        JOIN Parking_Areas pa ON sl.area_id = pa.area_id
+        JOIN Vehicles v ON s.vehicle_id = v.vehicle_id
+        JOIN Users u ON v.user_id = u.user_id
+        LEFT JOIN Pricing pr ON pa.area_id = pr.area_id AND v.vehicle_type = pr.vehicle_type
+        WHERE s.session_status = 'ACTIVE'
+        ORDER BY s.entry_time DESC;
+    """)
+
+    now = datetime.datetime.now()
+    for s in active_sessions:
+        entry_dt = datetime.datetime.fromisoformat(str(s['entry_time']).replace(' ', 'T'))
+        mins = max(1, int((now - entry_dt).total_seconds() / 60))
+        s['current_duration_mins'] = mins
+        hours = max(1, (mins + 59) // 60)
+        s['estimated_accrued_charge'] = hours * float(s['base_hourly_rate'])
+
+    return render_template('watchman/dashboard.html',
+                           watchman=g.watchman or g.admin,
+                           stats=stats,
+                           active_sessions=active_sessions)
+
+@app.route('/watchman/checkin', methods=['POST'])
+@watchman_required
+def watchman_checkin():
+    code = request.form.get('booking_code', '').strip().upper()
+    if not code:
+        flash('Please scan or provide a booking code.', 'error')
+        return redirect(url_for('watchman_dashboard'))
+
+    res = database.checkin_vehicle(code)
+    if res['success']:
+        flash(f"Gate 1/2 Entry Barrier Raised! {res['message']}", 'success')
+    else:
+        flash(res['message'], 'error')
+    return redirect(url_for('watchman_dashboard'))
+
+@app.route('/watchman/checkout/<int:session_id>', methods=['POST'])
+@watchman_required
+def watchman_checkout_session(session_id):
+    pay_method = request.form.get('payment_method', 'WALLET')
+    res = database.checkout_vehicle(session_id, payment_method=pay_method)
+    if res['success']:
+        flash(f"Exit Barrier Raised! {res['message']}", 'success')
+    else:
+        flash(res['message'], 'error')
+    return redirect(url_for('watchman_dashboard'))
+
+@app.route('/watchman/checkout-code', methods=['POST'])
+@watchman_required
+def watchman_checkout_code():
+    query = request.form.get('search_code', '').strip().upper()
+    pay_method = request.form.get('payment_method', 'WALLET')
+
+    sess = database.execute_query("""
+        SELECT s.session_id
+        FROM Parking_Sessions s
+        JOIN Vehicles v ON s.vehicle_id = v.vehicle_id
+        LEFT JOIN Reservations r ON s.reservation_id = r.reservation_id
+        WHERE s.session_status = 'ACTIVE'
+          AND (v.license_plate = %s OR r.booking_code = %s)
+        LIMIT 1;
+    """, (query, query), fetch_one=True)
+
+    if not sess:
+        flash(f"No active session found for plate or pass '{query}'.", 'error')
+        return redirect(url_for('watchman_dashboard'))
+
+    res = database.checkout_vehicle(sess['session_id'], payment_method=pay_method)
+    if res['success']:
+        flash(f"Exit Verified & Barrier Raised! {res['message']}", 'success')
+    else:
+        flash(res['message'], 'error')
+    return redirect(url_for('watchman_dashboard'))
 
 @app.route('/logout')
 def logout():

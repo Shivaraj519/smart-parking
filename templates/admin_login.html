@@ -1,38 +1,41 @@
 {% extends 'base.html' %}
-{% block title %}Admin Sign In - ParkSmart Control Center{% endblock %}
+{% block title %}Mall Administrator Access - ParkSmart 2.0{% endblock %}
 
 {% block content %}
 <div class="container py-5">
   <div class="row justify-content-center">
     <div class="col-md-5">
-      <div class="custom-card p-4 p-md-5" style="border-top: 4px solid var(--forest-green);">
+      <div class="custom-card p-4 p-md-5" style="border-top: 5px solid var(--text-espresso);">
         <div class="text-center mb-4">
-          <span class="badge mb-2 px-3 py-1" style="background-color: var(--forest-green-light); color: var(--forest-green);">ADMINISTRATIVE CONSOLE</span>
-          <h3 class="serif-heading mb-1">DBMS System Access</h3>
-          <p class="text-secondary mb-0" style="font-size:0.9rem;">Elevated privileges for operators, auditors, and administrators</p>
+          <div class="d-inline-flex align-items-center justify-content-center rounded-circle mb-2" style="width: 54px; height: 54px; background: var(--bg-sidebar); color: #FFFFFF; font-size: 1.5rem;">
+            🏢
+          </div>
+          <span class="card-label text-warning d-block mb-1">HEADQUARTERS</span>
+          <h3 class="serif-heading mb-1">Mall Administration Access</h3>
+          <p class="text-muted mb-0" style="font-size:0.88rem;">Elevated privileges for mall operators and auditors</p>
         </div>
 
         <form method="POST" action="{{ url_for('admin_login') }}">
           <div class="mb-3">
-            <label class="form-label text-secondary fw-semibold" style="font-size:0.88rem;">Admin Username or Email</label>
-            <input type="text" name="username" class="form-control" placeholder="admin" required autofocus value="{{ request.form.get('username', '') }}">
+            <label class="card-label">ADMIN USERNAME OR EMAIL</label>
+            <input type="text" name="username" class="form-control" placeholder="admin" required autofocus value="admin">
           </div>
 
           <div class="mb-4">
             <div class="d-flex justify-content-between align-items-center mb-1">
-              <label class="form-label text-secondary fw-semibold mb-0" style="font-size:0.88rem;">Secret Key / Password</label>
-              <small class="text-muted">Sample: <code>admin123</code></small>
+              <label class="card-label mb-0">SECRET KEY / PASSWORD</label>
+              <small class="text-muted">Default: <code>admin123</code></small>
             </div>
-            <input type="password" name="password" class="form-control" placeholder="••••••••" required>
+            <input type="password" name="password" class="form-control" placeholder="••••••••" required value="admin123">
           </div>
 
-          <button type="submit" class="btn-forest w-100 justify-content-center py-2 mb-3">
-            Authorize & Access DBMS Dashboard
+          <button type="submit" class="btn-espresso w-100 justify-content-center py-2 mb-3">
+            Authorize & Access Admin Console &rarr;
           </button>
         </form>
 
-        <div class="p-3 mt-3 rounded" style="background-color: var(--bg-card-subtle); font-size: 0.8rem;">
-          <strong class="d-block mb-1">🔑 Academic Evaluation Admin Credentials:</strong>
+        <div class="p-3 mt-3 rounded text-center" style="background-color: var(--bg-card-subtle); font-size: 0.8rem;">
+          <strong class="d-block mb-1">🔑 Demo Admin Credentials:</strong>
           <span>Username: <code>admin</code> | Password: <code>admin123</code></span>
         </div>
       </div>

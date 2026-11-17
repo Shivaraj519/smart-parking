@@ -1,174 +1,193 @@
 {% extends 'base.html' %}
-{% block title %}Administrator Dashboard - ParkSmart DBMS Console{% endblock %}
+{% block title %}Mall Administrator Dashboard - ParkSmart 2.0{% endblock %}
 
 {% block content %}
-<div class="container py-4">
-  <!-- Admin Header -->
-  <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+<div class="admin-layout-wrapper">
+  <!-- Professional Sidebar Navigation System -->
+  <aside class="admin-sidebar">
     <div>
-      <span class="badge mb-1 px-3 py-1" style="background-color: var(--forest-green-light); color: var(--forest-green);">ADMINISTRATIVE OVERVIEW</span>
-      <h2 class="serif-heading mb-1">System Control & Operations Center</h2>
-      <p class="text-secondary mb-0" style="font-size:0.92rem;">
-        Logged in as: <strong>{{ admin.full_name }}</strong> (Role: <span class="badge bg-secondary">{{ admin.role }}</span>) | Database Engine: <strong>{{ db_driver }}</strong>
-      </p>
+      <div class="px-2 mb-4">
+        <span class="card-label text-warning d-block mb-1">MALL HEADQUARTERS</span>
+        <h5 class="fw-bold mb-0 text-white font-monospace">PARKSMART ADMIN</h5>
+        <small class="text-white-50">Phoenix Mall of Asia Hub</small>
+      </div>
+
+      <nav class="d-flex flex-column">
+        <a href="{{ url_for('admin_dashboard') }}" class="admin-nav-item active">
+          <span>📊</span>
+          <span>Operations Overview</span>
+        </a>
+        <a href="{{ url_for('admin_parking_areas') }}" class="admin-nav-item">
+          <span>🏢</span>
+          <span>Mall Facility Zones</span>
+        </a>
+        <a href="{{ url_for('admin_parking_slots') }}" class="admin-nav-item">
+          <span>🚗</span>
+          <span>Bay Inventory & EV</span>
+        </a>
+        <a href="{{ url_for('admin_analytics') }}" class="admin-nav-item">
+          <span>📈</span>
+          <span>Revenue & Demand</span>
+        </a>
+        <a href="{{ url_for('admin_sql_demo') }}" class="admin-nav-item">
+          <span>💾</span>
+          <span>DBMS Lab Showcase</span>
+        </a>
+      </nav>
     </div>
 
-    <!-- Quick Action Gate -->
-    <div class="d-flex gap-2">
-      <a href="{{ url_for('admin_parking_areas') }}" class="btn-outline-forest btn-sm">Manage Areas</a>
-      <a href="{{ url_for('admin_parking_slots') }}" class="btn-forest btn-sm">+ Add Slot</a>
-      <a href="{{ url_for('admin_sql_demo') }}" class="btn btn-outline-dark btn-sm font-monospace">SQL Lab</a>
-    </div>
-  </div>
-
-  <!-- Primary Metric Cards -->
-  <div class="row g-3 mb-4">
-    <div class="col-xl-3 col-md-6">
-      <div class="custom-card">
-        <div class="card-label">Total Parking Slots</div>
-        <div class="stat-value">{{ stats.total_slots }}</div>
-        <div class="d-flex gap-2 mt-2" style="font-size:0.8rem;">
-          <span class="text-success fw-bold">{{ stats.available_slots }} Free</span> •
-          <span class="text-warning fw-bold">{{ stats.reserved_slots }} Reserved</span> •
-          <span class="text-danger fw-bold">{{ stats.occupied_slots }} Parked</span>
+    <!-- Admin profile footer -->
+    <div class="pt-3 border-top border-secondary">
+      <div class="d-flex align-items-center gap-2 mb-2">
+        <div class="rounded-circle bg-warning text-dark d-flex align-items-center justify-content-center fw-bold" style="width:32px; height:32px; font-size:0.85rem;">
+          {{ admin.username[:2]|upper }}
+        </div>
+        <div>
+          <strong class="text-white d-block" style="font-size:0.85rem;">{{ admin.full_name }}</strong>
+          <small class="text-white-50" style="font-size:0.7rem;">Role: {{ admin.role }}</small>
         </div>
       </div>
+      <a href="{{ url_for('logout') }}" class="btn btn-sm btn-outline-light w-100" style="font-size:0.75rem;">Sign Out</a>
     </div>
+  </aside>
 
-    <div class="col-xl-3 col-md-6">
-      <div class="custom-card">
-        <div class="card-label">Active Parking Sessions</div>
-        <div class="stat-value text-danger">{{ stats.active_sessions }}</div>
-        <small class="text-muted">Vehicles currently parked on premises</small>
-      </div>
-    </div>
-
-    <div class="col-xl-3 col-md-6">
-      <div class="custom-card">
-        <div class="card-label">Registered Users / Vehicles</div>
-        <div class="stat-value text-primary">{{ stats.total_users }} <span style="font-size:1.2rem; color:var(--text-muted);">/ {{ stats.total_vehicles }}</span></div>
-        <small class="text-muted">Multi-vehicle driver accounts</small>
-      </div>
-    </div>
-
-    <div class="col-xl-3 col-md-6">
-      <div class="custom-card">
-        <div class="card-label">Total Revenue Collected</div>
-        <div class="stat-value text-success">₹{{ "%.2f"|format(stats.total_revenue) }}</div>
-        <small class="text-muted">Today's: ₹{{ "%.2f"|format(stats.today_revenue) }}</small>
-      </div>
-    </div>
-  </div>
-
-  <!-- Active Parking Sessions & Gate Exit Controller -->
-  <div class="row g-4 mb-4">
-    <div class="col-lg-8">
-      <div class="custom-card">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-          <div>
-            <h5 class="serif-heading mb-0">Live Active Parking Sessions</h5>
-            <small class="text-muted">Vehicles physically occupying slots right now</small>
-          </div>
-          <span class="badge bg-danger">{{ active_sessions|length }} Vehicles Active</span>
-        </div>
-
-        {% if active_sessions %}
-        <div class="table-responsive">
-          <table class="custom-table">
-            <thead>
-              <tr>
-                <th>Session ID</th>
-                <th>Vehicle & Driver</th>
-                <th>Bay / Area</th>
-                <th>Entry Time</th>
-                <th>Duration</th>
-                <th>Est. Fee</th>
-                <th>Checkout Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for s in active_sessions %}
-              <tr>
-                <td><strong class="font-monospace">#{{ s.session_id }}</strong></td>
-                <td>
-                  <strong class="font-monospace text-primary">{{ s.license_plate }}</strong>
-                  <div class="text-muted" style="font-size:0.75rem;">{{ s.driver_name }} ({{ s.phone_number }})</div>
-                </td>
-                <td>
-                  <strong>{{ s.slot_number }}</strong>
-                  <div class="text-muted" style="font-size:0.75rem;">{{ s.area_name }}</div>
-                </td>
-                <td style="font-size:0.8rem;">{{ s.entry_time }}</td>
-                <td>
-                  <span class="badge bg-light text-dark border">{{ s.current_duration_mins }} mins</span>
-                </td>
-                <td><strong class="text-success">₹{{ "%.2f"|format(s.estimated_accrued_charge) }}</strong></td>
-                <td>
-                  <form method="POST" action="{{ url_for('admin_checkout_session', session_id=s.session_id) }}" onsubmit="return confirm('Process checkout for session #{{ s.session_id }}? Slot will be released to AVAILABLE.');">
-                    <button type="submit" class="btn btn-forest btn-sm py-0 px-2" style="font-size:0.78rem;">Process Exit</button>
-                  </form>
-                </td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-        {% else %}
-        <div class="text-center py-4 text-muted">
-          <p class="mb-0">No active vehicles currently inside the parking facilities.</p>
-        </div>
-        {% endif %}
-      </div>
-    </div>
-
-    <!-- Live Gate Check-In for Operators -->
-    <div class="col-lg-4">
-      <div class="custom-card">
-        <h5 class="serif-heading mb-2">Gate Operator Console</h5>
-        <p class="text-secondary" style="font-size:0.85rem;">
-          Verify incoming vehicles and log entry into MySQL by booking code.
+  <!-- Admin Main Operations Content -->
+  <main class="admin-content-area">
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+      <div>
+        <span class="card-label">CENTRAL MONITORING CONSOLE</span>
+        <h2 class="serif-heading mb-1">Mall Operations & Capacity</h2>
+        <p class="text-muted mb-0" style="font-size:0.9rem;">
+          Active Facility: <strong>Phoenix Mall of Asia, Bengaluru</strong> • Engine: <strong>{{ db_driver }}</strong>
         </p>
+      </div>
 
-        <form method="POST" action="{{ url_for('gate_checkin') }}">
-          <div class="mb-3">
-            <label class="form-label text-muted fw-semibold" style="font-size:0.78rem;">DRIVER BOOKING CODE</label>
-            <input type="text" name="booking_code" class="form-control font-monospace text-uppercase" placeholder="e.g. PK-A01001" required>
+      <div class="d-flex gap-2">
+        <a href="{{ url_for('admin_parking_slots') }}" class="btn-orange btn-sm">+ Add Parking Bay</a>
+        <a href="{{ url_for('admin_analytics') }}" class="btn-outline-orange btn-sm">Full Financials &rarr;</a>
+      </div>
+    </div>
+
+    <!-- Primary Operational Metric Strip -->
+    <div class="row g-3 mb-4">
+      <div class="col-xl-3 col-md-6">
+        <div class="custom-card p-4">
+          <div class="card-label">TOTAL PARKING BAYS</div>
+          <div class="stat-value">{{ stats.total_slots }}</div>
+          <div class="d-flex gap-2 mt-2" style="font-size:0.78rem;">
+            <span class="text-success fw-bold">{{ stats.available_slots }} Free</span> •
+            <span class="text-warning fw-bold">{{ stats.reserved_slots }} Reserved</span> •
+            <span class="text-danger fw-bold">{{ stats.occupied_slots }} Parked</span>
           </div>
-          <button type="submit" class="btn-forest w-100 justify-content-center py-2 mb-3">
-            Validate & Record Entry
-          </button>
-        </form>
+        </div>
+      </div>
 
-        <div class="p-3 rounded" style="background-color: var(--bg-card-subtle); font-size:0.8rem;">
-          <strong>Trigger Automation Effect:</strong>
-          <p class="text-muted mb-0 mt-1">
-            Validating entry fires database trigger <code>trg_after_session_insert</code> which flips <code>Parking_Slots.slot_status = 'OCCUPIED'</code> automatically.
-          </p>
+      <div class="col-xl-3 col-md-6">
+        <div class="custom-card p-4">
+          <div class="card-label">ACTIVE PARKED VEHICLES</div>
+          <div class="stat-value" style="color: var(--accent-terracotta);">{{ stats.active_sessions }}</div>
+          <small class="text-muted">Currently inside mall barrier gates</small>
+        </div>
+      </div>
+
+      <div class="col-xl-3 col-md-6">
+        <div class="custom-card p-4">
+          <div class="card-label">REGISTERED DRIVERS / CARS</div>
+          <div class="stat-value" style="color: var(--text-espresso);">
+            {{ stats.total_users }} <span style="font-size:1.2rem; color:var(--text-muted);">/ {{ stats.total_vehicles }}</span>
+          </div>
+          <small class="text-muted">Enrolled customer accounts</small>
+        </div>
+      </div>
+
+      <div class="col-xl-3 col-md-6">
+        <div class="custom-card p-4">
+          <div class="card-label">TOTAL REVENUE SETTLED</div>
+          <div class="stat-value text-success">₹{{ "%.2f"|format(stats.total_revenue) }}</div>
+          <small class="text-muted">Today's direct intake: ₹{{ "%.2f"|format(stats.today_revenue) }}</small>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- Interactive Charts Row -->
-  <div class="row g-4 mb-4">
-    <div class="col-md-6">
-      <div class="custom-card">
-        <h5 class="serif-heading mb-3">Parking Slot Occupancy Distribution</h5>
-        <div style="height: 250px;">
-          <canvas id="occupancyChart"></canvas>
+    <!-- Active Parking Sessions Live Feed Table -->
+    <div class="custom-card mb-4">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+          <h5 class="fw-bold mb-0">Live Active In-Session Vehicles</h5>
+          <small class="text-muted">Synchronized in real time with gate barrier sensors</small>
+        </div>
+        <span class="badge bg-danger">{{ active_sessions|length }} Vehicles Active</span>
+      </div>
+
+      {% if active_sessions %}
+      <div class="table-responsive">
+        <table class="custom-table">
+          <thead>
+            <tr>
+              <th>Session</th>
+              <th>Vehicle & Driver</th>
+              <th>Assigned Bay & Zone</th>
+              <th>Entry Time</th>
+              <th>Duration</th>
+              <th>Accrued Fee</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for s in active_sessions %}
+            <tr>
+              <td><strong class="font-monospace text-secondary">#{{ s.session_id }}</strong></td>
+              <td>
+                <strong class="font-monospace text-primary">{{ s.license_plate }}</strong>
+                <div class="text-muted" style="font-size:0.75rem;">{{ s.driver_name }} ({{ s.phone_number }})</div>
+              </td>
+              <td>
+                <strong>{{ s.slot_number }}</strong>
+                <div class="text-muted" style="font-size:0.75rem;">{{ s.area_name.split(',')[0] }}</div>
+              </td>
+              <td style="font-size:0.8rem;">{{ s.entry_time }}</td>
+              <td>
+                <span class="badge bg-light text-dark border">{{ s.current_duration_mins }} mins</span>
+              </td>
+              <td><strong class="text-success">₹{{ "%.2f"|format(s.estimated_accrued_charge) }}</strong></td>
+              <td>
+                <form method="POST" action="{{ url_for('admin_checkout_session', session_id=s.session_id) }}" onsubmit="return confirm('Process checkout for session #{{ s.session_id }}?');">
+                  <button type="submit" class="btn btn-orange btn-sm py-0 px-2" style="font-size:0.78rem;">Process Exit</button>
+                </form>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="text-center py-4 text-muted">
+        <p class="mb-0">No active vehicles currently occupying slots.</p>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Interactive Data Visualizations Row -->
+    <div class="row g-4">
+      <div class="col-lg-6">
+        <div class="custom-card p-4">
+          <h5 class="fw-bold mb-3">Live Bay Occupancy Distribution</h5>
+          <div style="height: 250px;">
+            <canvas id="occupancyChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-6">
+        <div class="custom-card p-4">
+          <h5 class="fw-bold mb-3">Availability by Vehicle Category</h5>
+          <div style="height: 250px;">
+            <canvas id="categoryChart"></canvas>
+          </div>
         </div>
       </div>
     </div>
-
-    <div class="col-md-6">
-      <div class="custom-card">
-        <h5 class="serif-heading mb-3">Slot Availability by Vehicle Category</h5>
-        <div style="height: 250px;">
-          <canvas id="categoryChart"></canvas>
-        </div>
-      </div>
-    </div>
-  </div>
+  </main>
 </div>
 {% endblock %}
 
@@ -183,7 +202,7 @@ document.addEventListener('DOMContentLoaded', function() {
       labels: ['Available', 'Reserved', 'Occupied'],
       datasets: [{
         data: [{{ stats.available_slots }}, {{ stats.reserved_slots }}, {{ stats.occupied_slots }}],
-        backgroundColor: ['#3E7B62', '#F6AD55', '#E53E3E'],
+        backgroundColor: ['#19693B', '#D97736', '#B43825'],
         borderWidth: 2,
         borderColor: '#ffffff'
       }]
@@ -191,9 +210,7 @@ document.addEventListener('DOMContentLoaded', function() {
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      plugins: {
-        legend: { position: 'bottom' }
-      }
+      plugins: { legend: { position: 'bottom' } }
     }
   });
 
@@ -206,24 +223,20 @@ document.addEventListener('DOMContentLoaded', function() {
       datasets: [{
         label: 'Total Bays',
         data: {{ category_totals|tojson }},
-        backgroundColor: '#D5CEC1',
+        backgroundColor: '#EDE0CF',
         borderRadius: 4
       }, {
         label: 'Available Bays',
         data: {{ category_available|tojson }},
-        backgroundColor: '#245A44',
+        backgroundColor: '#D97736',
         borderRadius: 4
       }]
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      scales: {
-        y: { beginAtZero: true, ticks: { precision: 0 } }
-      },
-      plugins: {
-        legend: { position: 'bottom' }
-      }
+      scales: { y: { beginAtZero: true, ticks: { precision: 0 } } },
+      plugins: { legend: { position: 'bottom' } }
     }
   });
 });

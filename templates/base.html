@@ -3,74 +3,89 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{% block title %}Smart Parking Slot Management System{% endblock %}</title>
+  <title>{% block title %}ParkSmart 2.0 - Premium Mall Parking Platform{% endblock %}</title>
   
-  <!-- Fonts -->
+  <!-- Premium Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,400&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
   
   <!-- Bootstrap 5 CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <!-- GSAP Animation Library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
   
-  <!-- Custom Design System -->
+  <!-- ParkSmart 2.0 Design System -->
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
   {% block extra_css %}{% endblock %}
 </head>
 <body>
 
-  <!-- Navigation Bar -->
+  <!-- Premium Navigation Header -->
   <nav class="navbar-custom">
     <div class="container-fluid d-flex justify-content-between align-items-center">
       <a href="{{ url_for('index') }}" class="brand-badge">
-        <svg width="24" height="24" viewBox="0 0 24 24">
-          <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-6 8.5c0 .83-.67 1.5-1.5 1.5H9.5V8h2c.83 0 1.5.67 1.5 1.5v2zm2-2C15 8.12 13.88 7 12.5 7H8v10h1.5v-4H12c1.66 0 3-1.34 3-3z"/>
-        </svg>
-        <span>PARKSMART DBMS</span>
+        <div class="brand-icon-box">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-6 8.5c0 .83-.67 1.5-1.5 1.5H9.5V8h2c.83 0 1.5.67 1.5 1.5v2zm2-2C15 8.12 13.88 7 12.5 7H8v10h1.5v-4H12c1.66 0 3-1.34 3-3z"/>
+          </svg>
+        </div>
+        <span>PARKSMART</span>
+        <span class="version-tag">MALL 2.0</span>
       </a>
 
-      <div class="d-flex align-items-center gap-3">
+      <div class="d-flex align-items-center gap-2">
         <a href="{{ url_for('parking_availability') }}" class="nav-link-custom">Live Availability</a>
+        <a href="{{ url_for('find_my_car') }}" class="nav-link-custom">Find My Car</a>
         
         {% if session.get('user_id') %}
-          <a href="{{ url_for('user_dashboard') }}" class="nav-link-custom">My Dashboard</a>
-          <a href="{{ url_for('user_vehicles') }}" class="nav-link-custom">Vehicles</a>
+          <a href="{{ url_for('user_dashboard') }}" class="nav-link-custom">Driver Dashboard</a>
+          <a href="{{ url_for('user_vehicles') }}" class="nav-link-custom">My Vehicles</a>
           <a href="{{ url_for('user_booking_history') }}" class="nav-link-custom">Reservations</a>
-          <a href="{{ url_for('user_payments') }}" class="nav-link-custom">Payments</a>
-          <div class="dropdown">
-            <button class="btn btn-outline-forest dropdown-toggle py-1 px-3" type="button" data-bs-toggle="dropdown">
+          
+          <div class="dropdown ms-2">
+            <button class="btn btn-outline-orange dropdown-toggle py-1 px-3" type="button" data-bs-toggle="dropdown">
               👤 {{ session.get('user_name', 'Driver') }} (₹{{ "%.2f"|format(session.get('wallet_balance', 0.0)) }})
             </button>
-            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
-              <li><a class="dropdown-item" href="{{ url_for('user_dashboard') }}">Profile & Wallet</a></li>
+            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0" style="background: #FFFFFF; border-radius: 12px;">
+              <li><a class="dropdown-item" href="{{ url_for('user_dashboard') }}">My Dashboard</a></li>
+              <li><a class="dropdown-item" href="{{ url_for('user_payments') }}">Payment Ledger</a></li>
               <li><hr class="dropdown-divider"></li>
               <li><a class="dropdown-item text-danger" href="{{ url_for('logout') }}">Sign Out</a></li>
             </ul>
           </div>
+        {% elif session.get('watchman_id') %}
+          <a href="{{ url_for('watchman_dashboard') }}" class="btn btn-orange py-1 px-3">Gate Watchman Console</a>
+          <a href="{{ url_for('logout') }}" class="nav-link-custom text-muted">Logout</a>
         {% elif session.get('admin_id') %}
-          <a href="{{ url_for('admin_dashboard') }}" class="nav-link-custom">Admin Console</a>
-          <a href="{{ url_for('admin_parking_areas') }}" class="nav-link-custom">Areas</a>
-          <a href="{{ url_for('admin_parking_slots') }}" class="nav-link-custom">Slots</a>
-          <a href="{{ url_for('admin_analytics') }}" class="nav-link-custom">Analytics</a>
-          <a href="{{ url_for('admin_sql_demo') }}" class="nav-link-custom">DBMS Showcase</a>
-          <a href="{{ url_for('logout') }}" class="btn btn-outline-forest py-1 px-3">Logout (Admin)</a>
+          <a href="{{ url_for('admin_dashboard') }}" class="btn btn-espresso py-1 px-3">Admin Portal</a>
+          <a href="{{ url_for('logout') }}" class="nav-link-custom text-muted">Logout (Admin)</a>
         {% else %}
-          <a href="{{ url_for('login') }}" class="btn-outline-forest">Log In</a>
-          <a href="{{ url_for('register') }}" class="btn-forest">Get Started</a>
-          <a href="{{ url_for('admin_login') }}" class="nav-link-custom text-muted" style="font-size:0.8rem;">Admin Portal</a>
+          <a href="{{ url_for('login') }}" class="nav-link-custom">Log In</a>
+          <a href="{{ url_for('register') }}" class="btn-orange">Book Parking</a>
+          <div class="dropdown d-inline">
+            <button class="btn btn-outline-orange py-1 px-2 dropdown-toggle" type="button" data-bs-toggle="dropdown" style="font-size:0.8rem;">
+              Staff Portals
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0" style="border-radius:10px;">
+              <li><a class="dropdown-item" href="{{ url_for('watchman_login') }}">🛡️ Watchman Portal</a></li>
+              <li><a class="dropdown-item" href="{{ url_for('admin_login') }}">🏢 Mall Admin Portal</a></li>
+            </ul>
+          </div>
         {% endif %}
       </div>
     </div>
   </nav>
 
-  <!-- Flash Messaging -->
+  <!-- Flash Messaging Notifications -->
   <div class="container mt-3">
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
         {% for category, message in messages %}
-          <div class="alert-custom alert-custom-{{ 'success' if category == 'success' else 'error' }}">
+          <div class="alert-custom alert-custom-{{ 'success' if category == 'success' else 'error' }} animate-fade-in">
             <span>{{ '✓' if category == 'success' else '⚠️' }}</span>
             <div>{{ message }}</div>
           </div>
@@ -79,20 +94,63 @@
     {% endwith %}
   </div>
 
-  <!-- Main Content Container -->
-  <main class="py-4">
+  <!-- Main Body Content Block -->
+  <main>
     {% block content %}{% endblock %}
   </main>
 
-  <!-- Academic Footer -->
-  <footer class="mt-5 py-4 border-top" style="background-color: var(--bg-surface); border-color: var(--border-subtle) !important;">
-    <div class="container text-center">
-      <p class="mb-1 text-secondary" style="font-size: 0.9rem;">
-        <strong>Smart Parking Slot Management System</strong> — Database Management System (DBMS) Project
-      </p>
-      <p class="text-muted mb-0" style="font-size: 0.8rem;">
-        Built with Python Flask & MySQL (Normalized 3NF Architecture • Transactions • Stored Procedures • Triggers • Views)
-      </p>
+  <!-- Premium Mall Platform Footer -->
+  <footer class="mt-5 py-5 border-top" style="background-color: var(--bg-card); border-color: var(--border-subtle) !important;">
+    <div class="container">
+      <div class="row g-4 justify-content-between mb-4">
+        <div class="col-lg-4">
+          <div class="brand-badge mb-3">
+            <div class="brand-icon-box">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-6 8.5c0 .83-.67 1.5-1.5 1.5H9.5V8h2c.83 0 1.5.67 1.5 1.5v2zm2-2C15 8.12 13.88 7 12.5 7H8v10h1.5v-4H12c1.66 0 3-1.34 3-3z"/>
+              </svg>
+            </div>
+            <span>PARKSMART 2.0</span>
+          </div>
+          <p class="text-muted" style="font-size: 0.9rem;">
+            Enterprise Smart Mall Parking Platform deployed with multi-zone availability, watchman barcode scanning, and indoor vehicle wayfinding.
+          </p>
+          <div class="badge px-3 py-1" style="background: var(--accent-orange-light); color: var(--accent-terracotta); font-weight:700;">
+            📍 Demonstration Hub: Phoenix Mall of Asia, Bengaluru
+          </div>
+        </div>
+
+        <div class="col-lg-2 col-6">
+          <h6 class="card-label mb-3">PORTALS</h6>
+          <ul class="list-unstyled" style="font-size: 0.88rem;">
+            <li class="mb-2"><a href="{{ url_for('parking_availability') }}" class="text-decoration-none text-muted">Customer Portal</a></li>
+            <li class="mb-2"><a href="{{ url_for('watchman_login') }}" class="text-decoration-none text-muted">Watchman Barrier Portal</a></li>
+            <li class="mb-2"><a href="{{ url_for('admin_login') }}" class="text-decoration-none text-muted">Mall Admin Portal</a></li>
+            <li class="mb-2"><a href="{{ url_for('find_my_car') }}" class="text-decoration-none text-muted">Find My Car</a></li>
+          </ul>
+        </div>
+
+        <div class="col-lg-2 col-6">
+          <h6 class="card-label mb-3">SYSTEM ARCHITECTURE</h6>
+          <ul class="list-unstyled" style="font-size: 0.88rem;">
+            <li class="mb-2 text-muted">3NF Normalized Relational Core</li>
+            <li class="mb-2 text-muted">Pessimistic Concurrency Locking</li>
+            <li class="mb-2 text-muted">Automated State Triggers</li>
+            <li class="mb-2 text-muted">Real-Time Polling Engine</li>
+          </ul>
+        </div>
+
+        <div class="col-lg-3">
+          <h6 class="card-label mb-3">LOCATION ASSISTANCE</h6>
+          <p class="text-muted mb-1" style="font-size: 0.85rem;"><strong>Phoenix Mall of Asia</strong></p>
+          <p class="text-muted" style="font-size: 0.82rem;">Bellary Road, Byatarayanapura, Yelahanka, Bengaluru, Karnataka 560092</p>
+          <div class="text-success fw-bold" style="font-size:0.82rem;">● Gates 1 & 2 Automated Sensors Online</div>
+        </div>
+      </div>
+
+      <div class="pt-4 border-top text-center text-muted" style="font-size: 0.8rem; border-color: var(--border-subtle) !important;">
+        © 2026 ParkSmart Commercial Systems. All rights reserved. Built with Python Flask, Relational DBMS Architecture & Chart.js.
+      </div>
     </div>
   </footer>
 

@@ -1,24 +1,24 @@
 {% extends 'base.html' %}
-{% block title %}Reservation Confirmation - ParkSmart{% endblock %}
+{% block title %}Reservation Digital Pass - ParkSmart 2.0{% endblock %}
 
 {% block content %}
 <div class="container py-5">
   <div class="row justify-content-center">
     <div class="col-md-7">
-      <div class="custom-card p-4 p-md-5 text-center" style="border-top: 5px solid var(--forest-green);">
+      <div class="custom-card p-4 p-md-5 text-center" style="border-top: 5px solid var(--accent-orange);">
         <div class="mb-3">
-          <div class="d-inline-flex align-items-center justify-content-center rounded-circle" style="width: 64px; height: 64px; background-color: var(--forest-green-light); color: var(--forest-green); font-size: 2rem;">
+          <div class="d-inline-flex align-items-center justify-content-center rounded-circle" style="width: 64px; height: 64px; background-color: var(--accent-orange-light); color: var(--accent-terracotta); font-size: 2rem;">
             ✓
           </div>
         </div>
         <h2 class="serif-heading mb-1">Reservation Confirmed!</h2>
-        <p class="text-secondary mb-4">Your parking bay has been reserved and registered in MySQL.</p>
+        <p class="text-muted mb-4">Your bay is reserved at Phoenix Mall of Asia. Present this pass at the gate barrier.</p>
 
-        <!-- Booking Pass Card -->
+        <!-- Pass Card -->
         <div class="p-4 rounded text-start mb-4" style="background-color: var(--bg-card-subtle); border: 2px dashed var(--border-strong);">
           <div class="d-flex justify-content-between align-items-start border-bottom pb-3 mb-3">
             <div>
-              <span class="text-muted" style="font-size:0.75rem;">BOOKING PASS CODE</span>
+              <span class="card-label">DIGITAL BARRIER PASS CODE</span>
               <div class="display-6 fw-bold font-monospace text-primary">{{ res.booking_code }}</div>
             </div>
             <div class="text-end">
@@ -28,43 +28,43 @@
 
           <div class="row g-3" style="font-size: 0.9rem;">
             <div class="col-6">
-              <span class="text-muted d-block">Facility:</span>
+              <span class="text-muted d-block" style="font-size:0.75rem;">FACILITY LOCATION</span>
               <strong>{{ res.area_name }}</strong>
             </div>
             <div class="col-6">
-              <span class="text-muted d-block">Assigned Slot:</span>
-              <strong class="font-monospace">{{ res.slot_number }} ({{ res.floor_level }})</strong>
+              <span class="text-muted d-block" style="font-size:0.75rem;">ASSIGNED BAY</span>
+              <strong class="font-monospace text-danger" style="font-size:1.05rem;">{{ res.slot_number }} ({{ res.floor_level }})</strong>
             </div>
             <div class="col-6">
-              <span class="text-muted d-block">Registered Vehicle:</span>
+              <span class="text-muted d-block" style="font-size:0.75rem;">REGISTERED VEHICLE</span>
               <strong>{{ res.license_plate }}</strong>
             </div>
             <div class="col-6">
-              <span class="text-muted d-block">Vehicle Type:</span>
+              <span class="text-muted d-block" style="font-size:0.75rem;">CATEGORY</span>
               <span>{{ res.vehicle_type }}</span>
             </div>
             <div class="col-6">
-              <span class="text-muted d-block">Start Time:</span>
+              <span class="text-muted d-block" style="font-size:0.75rem;">SCHEDULE START</span>
               <span>{{ res.start_time }}</span>
             </div>
             <div class="col-6">
-              <span class="text-muted d-block">End Time:</span>
+              <span class="text-muted d-block" style="font-size:0.75rem;">SCHEDULE END</span>
               <span>{{ res.end_time }}</span>
             </div>
             <div class="col-6">
-              <span class="text-muted d-block">Paid Amount:</span>
+              <span class="text-muted d-block" style="font-size:0.75rem;">PREPAID AMOUNT</span>
               <strong class="text-success">₹{{ "%.2f"|format(res.estimated_cost) }}</strong>
             </div>
             <div class="col-6">
-              <span class="text-muted d-block">Payment Method:</span>
+              <span class="text-muted d-block" style="font-size:0.75rem;">SETTLEMENT</span>
               <span>{{ payment.payment_method if payment else 'WALLET' }} (Settled)</span>
             </div>
           </div>
         </div>
 
         <div class="d-flex gap-3 justify-content-center">
-          <a href="{{ url_for('user_dashboard') }}" class="btn-forest">Go to Dashboard</a>
-          <button onclick="window.print()" class="btn-outline-forest">Print Pass</button>
+          <a href="{{ url_for('user_dashboard') }}" class="btn-orange">Go to Dashboard</a>
+          <button onclick="window.print()" class="btn-outline-orange">Print Digital Pass</button>
         </div>
       </div>
     </div>

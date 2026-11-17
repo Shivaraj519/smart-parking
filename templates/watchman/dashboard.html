@@ -1,0 +1,172 @@
+{% extends 'base.html' %}
+{% block title %}Watchman Gate Console - ParkSmart Mobile Portal{% endblock %}
+
+{% block content %}
+<div class="watchman-mobile-container">
+  <!-- Top Watchman Header -->
+  <div class="custom-card p-3 mb-3 d-flex justify-content-between align-items-center" style="border-left: 4px solid var(--accent-orange);">
+    <div>
+      <span class="badge bg-secondary mb-1" style="font-size:0.65rem;">GATE 2 BARRIER TERMINAL</span>
+      <h5 class="fw-bold mb-0 text-dark">{{ watchman.full_name }}</h5>
+      <small class="text-muted">Phoenix Mall of Asia • Security Desk</small>
+    </div>
+    <div class="text-end">
+      <span class="badge bg-success" style="font-size:0.75rem;">● GATE ONLINE</span>
+    </div>
+  </div>
+
+  <!-- Primary Fast Touch Action Buttons (Mobile-First) -->
+  <div class="row g-3 mb-4">
+    <div class="col-6">
+      <button class="watchman-action-btn watchman-checkin-btn w-100" data-bs-toggle="modal" data-bs-target="#watchmanCheckinModal">
+        <span style="font-size: 1.8rem;">🚗</span>
+        <span>CHECK IN</span>
+        <small style="font-size: 0.72rem; opacity: 0.85;">Scan or Enter Code</small>
+      </button>
+    </div>
+
+    <div class="col-6">
+      <button class="watchman-action-btn watchman-checkout-btn w-100" data-bs-toggle="modal" data-bs-target="#watchmanCheckoutModal">
+        <span style="font-size: 1.8rem;">🏁</span>
+        <span>CHECK OUT</span>
+        <small style="font-size: 0.72rem; opacity: 0.85;">Settle Bill & Exit</small>
+      </button>
+    </div>
+  </div>
+
+  <!-- Quick Barrier Status Strip -->
+  <div class="custom-card p-3 mb-4">
+    <div class="row g-2 text-center" style="font-size: 0.85rem;">
+      <div class="col-4 border-end">
+        <div class="text-muted" style="font-size:0.7rem;">TOTAL BAYS</div>
+        <strong class="h5 mb-0 d-block">{{ stats.total_slots }}</strong>
+      </div>
+      <div class="col-4 border-end">
+        <div class="text-muted" style="font-size:0.7rem;">AVAILABLE</div>
+        <strong class="h5 mb-0 text-success d-block">{{ stats.available_slots }}</strong>
+      </div>
+      <div class="col-4">
+        <div class="text-muted" style="font-size:0.7rem;">OCCUPIED</div>
+        <strong class="h5 mb-0 text-danger d-block">{{ stats.occupied_slots }}</strong>
+      </div>
+    </div>
+  </div>
+
+  <!-- Active Parking Sessions for Instant Watchman Exit Action -->
+  <div class="custom-card p-3 mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <div>
+        <h6 class="fw-bold mb-0">Active Vehicles in Bays</h6>
+        <small class="text-muted">Click to quickly settle & open exit barrier</small>
+      </div>
+      <span class="badge bg-danger">{{ active_sessions|length }} Parked</span>
+    </div>
+
+    {% if active_sessions %}
+    <div class="d-flex flex-column gap-2">
+      {% for s in active_sessions %}
+      <div class="p-3 rounded border d-flex justify-content-between align-items-center" style="background-color: var(--bg-card-subtle);">
+        <div>
+          <div class="d-flex align-items-center gap-2">
+            <strong class="font-monospace text-primary" style="font-size:0.95rem;">{{ s.license_plate }}</strong>
+            <span class="badge bg-light text-dark border" style="font-size:0.7rem;">Bay {{ s.slot_number }}</span>
+          </div>
+          <div class="text-muted mt-1" style="font-size:0.78rem;">
+            Driver: {{ s.driver_name }} ({{ s.phone_number }})
+          </div>
+          <div class="text-muted" style="font-size:0.75rem;">
+            In: {{ s.entry_time }} • Duration: <strong>{{ s.current_duration_mins }} mins</strong>
+          </div>
+        </div>
+
+        <div class="text-end">
+          <div class="fw-bold text-success mb-1" style="font-size:0.95rem;">₹{{ "%.2f"|format(s.estimated_accrued_charge) }}</div>
+          <form method="POST" action="{{ url_for('watchman_checkout_session', session_id=s.session_id) }}" onsubmit="return confirm('Verify payment & open gate for {{ s.license_plate }}?');">
+            <button type="submit" class="btn btn-sm btn-orange py-1 px-3" style="font-size:0.78rem;">
+              Exit Gate &rarr;
+            </button>
+          </form>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-4 text-muted" style="font-size:0.85rem;">
+      No vehicles currently parked in active sessions.
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Modal 1: Watchman Check-In Modal with Simulated QR Scanner -->
+<div class="modal fade" id="watchmanCheckinModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content custom-card p-4">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="fw-bold mb-0">Vehicle Entry Check-In</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <!-- QR Scanner Camera Simulation Box -->
+      <div class="p-3 rounded text-center mb-3" style="background:#29231F; color:#FFFFFF; border-radius:14px;">
+        <div style="font-size:2rem;" class="mb-1">📷</div>
+        <div class="fw-bold text-warning" style="font-size:0.85rem;">OPTICAL QR / BARCODE SENSOR ACTIVE</div>
+        <small class="text-white-50 d-block">Align customer's booking QR code to scan</small>
+        <button type="button" class="btn btn-sm btn-outline-light mt-2 py-0 px-3" onclick="simulateScanCode('PK-A05006')" style="font-size:0.75rem;">
+          Simulate Camera Scan (Sample PK-A05006)
+        </button>
+      </div>
+
+      <form method="POST" action="{{ url_for('watchman_checkin') }}">
+        <div class="mb-3">
+          <label class="card-label">ENTER DRIVER PASS CODE</label>
+          <input type="text" name="booking_code" id="watchmanInputCode" class="form-control font-monospace text-uppercase" placeholder="e.g. PK-A05006" required>
+        </div>
+        <button type="submit" class="btn-orange w-100 justify-content-center py-2">
+          Verify & Raise Entry Barrier &rarr;
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Modal 2: Watchman Check-Out Modal -->
+<div class="modal fade" id="watchmanCheckoutModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content custom-card p-4">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="fw-bold mb-0">Vehicle Exit & Settlement</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <form method="POST" action="{{ url_for('watchman_checkout_code') }}">
+        <div class="mb-3">
+          <label class="card-label">ENTER VEHICLE NUMBER OR PASS CODE</label>
+          <input type="text" name="search_code" class="form-control font-monospace text-uppercase" placeholder="e.g. KA01MH1001 or PK-A01001" required>
+        </div>
+
+        <div class="mb-3">
+          <label class="card-label">PAYMENT SETTLEMENT VERIFICATION</label>
+          <select name="payment_method" class="form-select">
+            <option value="WALLET">Wallet Auto-Deduction (Settled)</option>
+            <option value="UPI">UPI / QR Counter Payment</option>
+            <option value="CASH">Cash Collection at Booth</option>
+          </select>
+        </div>
+
+        <button type="submit" class="btn-orange w-100 justify-content-center py-2">
+          Confirm Exit & Release Bay &rarr;
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function simulateScanCode(sampleCode) {
+  document.getElementById('watchmanInputCode').value = sampleCode;
+}
+</script>
+{% endblock %}

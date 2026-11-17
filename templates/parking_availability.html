@@ -1,30 +1,31 @@
 {% extends 'base.html' %}
-{% block title %}Live Parking Availability & Visual Grid - ParkSmart{% endblock %}
+{% block title %}Live Mall Parking Availability & Visual Grid - ParkSmart 2.0{% endblock %}
 
 {% block content %}
 <div class="container py-4">
-  <!-- Header -->
+  <!-- Header Banner -->
   <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
     <div>
-      <h2 class="serif-heading mb-1">Live Parking Availability & Visual Bay Grid</h2>
-      <p class="text-secondary mb-0">Real-time database status queried directly via MySQL relational schema.</p>
+      <span class="card-label">REAL-TIME BAY RADAR</span>
+      <h2 class="serif-heading mb-1">Mall Parking Availability & Spatial Bay Grid</h2>
+      <p class="text-muted mb-0">Live sensor telemetry reflecting exact floor levels, zones, and EV fast-charging docks.</p>
     </div>
     
-    <!-- Legend -->
+    <!-- Sophisticated Legend -->
     <div class="d-flex gap-2 align-items-center p-2 rounded custom-card" style="font-size:0.82rem;">
-      <span class="badge badge-available px-2 py-1">AVAILABLE</span>
-      <span class="badge badge-reserved px-2 py-1">RESERVED</span>
-      <span class="badge badge-occupied px-2 py-1">OCCUPIED</span>
+      <span class="badge badge-available px-3 py-1">AVAILABLE</span>
+      <span class="badge badge-reserved px-3 py-1">RESERVED</span>
+      <span class="badge badge-occupied px-3 py-1">OCCUPIED</span>
     </div>
   </div>
 
-  <!-- Filter Bar -->
+  <!-- Multi-Criteria Filter Console -->
   <div class="custom-card p-3 mb-4">
     <form method="GET" action="{{ url_for('parking_availability') }}" class="row g-2 align-items-end">
       <div class="col-md-4">
-        <label class="form-label text-muted fw-semibold" style="font-size:0.78rem;">PARKING AREA</label>
+        <label class="card-label">MALL FACILITY / HUB</label>
         <select name="area_id" class="form-select" onchange="this.form.submit()">
-          <option value="">All Parking Facilities</option>
+          <option value="">All Mall Locations</option>
           {% for a in areas %}
           <option value="{{ a.area_id }}" {% if selected_area == a.area_id|string %}selected{% endif %}>
             {{ a.area_name }}
@@ -34,19 +35,19 @@
       </div>
 
       <div class="col-md-3">
-        <label class="form-label text-muted fw-semibold" style="font-size:0.78rem;">VEHICLE CATEGORY</label>
+        <label class="card-label">VEHICLE CATEGORY</label>
         <select name="vehicle_type" class="form-select" onchange="this.form.submit()">
           <option value="">All Categories</option>
-          <option value="TWO_WHEELER" {% if selected_type == 'TWO_WHEELER' %}selected{% endif %}>Two Wheeler</option>
-          <option value="SEDAN" {% if selected_type == 'SEDAN' %}selected{% endif %}>Sedan</option>
-          <option value="SUV" {% if selected_type == 'SUV' %}selected{% endif %}>SUV</option>
-          <option value="ELECTRIC_VEHICLE" {% if selected_type == 'ELECTRIC_VEHICLE' %}selected{% endif %}>Electric Vehicle (EV)</option>
-          <option value="TRUCK" {% if selected_type == 'TRUCK' %}selected{% endif %}>Truck / Heavy</option>
+          <option value="TWO_WHEELER" {% if selected_type == 'TWO_WHEELER' %}selected{% endif %}>Two Wheeler (Bikes)</option>
+          <option value="SEDAN" {% if selected_type == 'SEDAN' %}selected{% endif %}>Sedan (Mid-Size)</option>
+          <option value="SUV" {% if selected_type == 'SUV' %}selected{% endif %}>SUV & Crossover</option>
+          <option value="ELECTRIC_VEHICLE" {% if selected_type == 'ELECTRIC_VEHICLE' %}selected{% endif %}>Electric Vehicle (EV Dock)</option>
+          <option value="TRUCK" {% if selected_type == 'TRUCK' %}selected{% endif %}>Commercial / Heavy</option>
         </select>
       </div>
 
       <div class="col-md-3">
-        <label class="form-label text-muted fw-semibold" style="font-size:0.78rem;">SLOT STATUS</label>
+        <label class="card-label">SENSOR STATUS</label>
         <select name="status" class="form-select" onchange="this.form.submit()">
           <option value="">All Statuses</option>
           <option value="AVAILABLE" {% if selected_status == 'AVAILABLE' %}selected{% endif %}>Available Only</option>
@@ -56,31 +57,31 @@
       </div>
 
       <div class="col-md-2">
-        <a href="{{ url_for('parking_availability') }}" class="btn btn-outline-forest w-100">Reset Filter</a>
+        <a href="{{ url_for('parking_availability') }}" class="btn-outline-orange w-100 justify-content-center py-2">Reset Filters</a>
       </div>
     </form>
   </div>
 
-  <!-- Area Breakdown Summary Strip -->
+  <!-- Real-Time Metrics Strip -->
   <div class="row g-3 mb-4">
     <div class="col-md-4">
       <div class="custom-card p-3">
-        <div class="card-label">Matching Slots Found</div>
-        <div class="stat-value text-dark" style="font-size:1.6rem;">{{ slots|length }}</div>
+        <div class="card-label">Matching Bays Found</div>
+        <div class="stat-value" style="font-size:1.7rem; color:var(--text-espresso);">{{ slots|length }}</div>
       </div>
     </div>
     <div class="col-md-4">
       <div class="custom-card p-3">
-        <div class="card-label">Available for Booking</div>
-        <div class="stat-value text-success" style="font-size:1.6rem;">
+        <div class="card-label">Available for Immediate Booking</div>
+        <div class="stat-value text-success" style="font-size:1.7rem;">
           {{ slots | selectattr('slot_status', 'equalto', 'AVAILABLE') | list | length }}
         </div>
       </div>
     </div>
     <div class="col-md-4">
       <div class="custom-card p-3">
-        <div class="card-label">Occupied / In Session</div>
-        <div class="stat-value text-danger" style="font-size:1.6rem;">
+        <div class="card-label">Occupied by In-Session Cars</div>
+        <div class="stat-value text-danger" style="font-size:1.7rem;">
           {{ slots | selectattr('slot_status', 'equalto', 'OCCUPIED') | list | length }}
         </div>
       </div>
@@ -89,22 +90,25 @@
 
   <!-- Visual Grid of Parking Slots -->
   <div class="custom-card p-4">
-    <h5 class="serif-heading mb-3">Live Parking Bays</h5>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h5 class="fw-bold mb-0">Spatial Bay Layout</h5>
+      <span class="text-muted" style="font-size: 0.82rem;">Click any available slot to initiate reservation</span>
+    </div>
     
     {% if slots %}
     <div class="parking-grid">
       {% for slot in slots %}
       <div class="slot-box status-{{ slot.slot_status|lower }}" 
-           onclick="handleSlotClick('{{ slot.slot_id }}', '{{ slot.slot_status }}', '{{ slot.slot_number }}', '{{ slot.supported_vehicle_type }}', '{{ slot.area_name }}', '{{ slot.base_hourly_rate }}')">
+           onclick="handleSlotClick('{{ slot.slot_id }}', '{{ slot.slot_status }}', '{{ slot.slot_number }}', '{{ slot.supported_vehicle_type }}', '{{ slot.area_name }}', '{{ slot.base_hourly_rate }}', '{{ slot.floor_level }}')">
+        <div class="slot-zone-tag">{{ slot.floor_level.split('(')[0] }}</div>
         <div class="slot-number">{{ slot.slot_number }}</div>
         <div class="slot-type">
           {{ slot.supported_vehicle_type.replace('_', ' ') }}
           {% if slot.is_ev_charging_equipped %}⚡{% endif %}
         </div>
-        <div class="text-muted" style="font-size: 0.68rem; margin-top: 2px;">{{ slot.floor_level }}</div>
         <div class="slot-state-badge">{{ slot.slot_status }}</div>
         
-        <div class="mt-2 text-dark fw-bold" style="font-size: 0.78rem;">
+        <div class="mt-2 text-dark fw-bold" style="font-size: 0.8rem;">
           ₹{{ slot.base_hourly_rate }}/hr
         </div>
       </div>
@@ -112,7 +116,7 @@
     </div>
     {% else %}
     <div class="text-center py-5 text-muted">
-      <p class="mb-0">No parking slots matched your filter criteria.</p>
+      <p class="mb-0">No parking bays matched your selected filters.</p>
     </div>
     {% endif %}
   </div>
@@ -120,20 +124,15 @@
 
 <!-- Modal for Booking Slot -->
 <div class="modal fade" id="slotModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog">
+  <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content custom-card p-4">
       <div class="d-flex justify-content-between align-items-center mb-3">
         <h4 class="serif-heading mb-0" id="modalSlotTitle">Parking Bay Details</h4>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
 
-      <div id="modalSlotBody" class="mb-4" style="font-size:0.92rem;">
-        <!-- Dynamic JS content -->
-      </div>
-
-      <div id="modalSlotAction">
-        <!-- Dynamic reservation or status buttons -->
-      </div>
+      <div id="modalSlotBody" class="mb-4" style="font-size:0.92rem;"></div>
+      <div id="modalSlotAction"></div>
     </div>
   </div>
 </div>
@@ -141,7 +140,7 @@
 
 {% block extra_js %}
 <script>
-function handleSlotClick(slotId, status, slotNumber, vehicleType, areaName, rate) {
+function handleSlotClick(slotId, status, slotNumber, vehicleType, areaName, rate, floor) {
   const modalTitle = document.getElementById('modalSlotTitle');
   const modalBody = document.getElementById('modalSlotBody');
   const modalAction = document.getElementById('modalSlotAction');
@@ -157,15 +156,19 @@ function handleSlotClick(slotId, status, slotNumber, vehicleType, areaName, rate
         <strong>${areaName}</strong>
       </div>
       <div class="d-flex justify-content-between mb-1">
+        <span class="text-muted">Floor & Zone:</span>
+        <strong>${floor}</strong>
+      </div>
+      <div class="d-flex justify-content-between mb-1">
         <span class="text-muted">Category:</span>
         <strong>${vehicleType.replace('_', ' ')}</strong>
       </div>
       <div class="d-flex justify-content-between mb-1">
-        <span class="text-muted">Tariff:</span>
-        <strong>₹${rate} / Hour</strong>
+        <span class="text-muted">Hourly Tariff:</span>
+        <strong style="color:var(--accent-terracotta);">₹${rate} / Hour</strong>
       </div>
       <div class="d-flex justify-content-between">
-        <span class="text-muted">Current DB State:</span>
+        <span class="text-muted">Sensor State:</span>
         <span class="badge ${statusBadgeClass}">${status}</span>
       </div>
     </div>
@@ -173,20 +176,20 @@ function handleSlotClick(slotId, status, slotNumber, vehicleType, areaName, rate
 
   if (status === 'AVAILABLE') {
     modalAction.innerHTML = `
-      <a href="/user/reserve?slot_id=${slotId}" class="btn-forest w-100 justify-content-center py-2">
+      <a href="/user/reserve?slot_id=${slotId}" class="btn-orange w-100 justify-content-center py-2">
         Proceed to Reserve Bay ${slotNumber} &rarr;
       </a>
     `;
   } else if (status === 'RESERVED') {
     modalAction.innerHTML = `
       <div class="alert alert-warning py-2 mb-0 text-center" style="font-size:0.85rem;">
-        This slot is already reserved for an upcoming schedule. Select an available bay.
+        This bay is currently locked for an upcoming reservation. Please select another free bay.
       </div>
     `;
   } else {
     modalAction.innerHTML = `
       <div class="alert alert-danger py-2 mb-0 text-center" style="font-size:0.85rem;">
-        This slot is currently occupied by a parked vehicle in session.
+        This bay is currently occupied by a parked vehicle in session.
       </div>
     `;
   }
