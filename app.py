@@ -818,7 +818,7 @@ def admin_sql_demo():
 # INITIALIZATION & EXECUTION ENTRYPOINT
 # ---------------------------------------------------------------------
 if __name__ == '__main__':
-    port = int(os.getenv('PORT', 5000))
+    port = int(os.getenv('PORT', 5050))
     print(f"\n==================================================================")
     print(f" SMART PARKING SLOT MANAGEMENT SYSTEM - DBMS ACADEMIC PROJECT")
     print(f" Active Database Driver: {database.get_active_driver()}")
