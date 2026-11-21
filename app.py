@@ -234,13 +234,14 @@ def admin_login():
 @app.route('/find-my-car')
 def find_my_car():
     search_query = request.args.get('search_query', '').strip().upper()
+    selected_floor = request.args.get('floor', 'Basement 1 (Zone Gold)')
     vehicle_location = None
 
     if search_query:
         # Search active sessions first by license plate or booking code
         vehicle_location = database.execute_query("""
             SELECT s.session_id, s.entry_time, v.license_plate, v.make_model, v.vehicle_type,
-                   sl.slot_number, sl.floor_level, sl.section, sl.row_num, pa.area_name
+                   sl.slot_id, sl.slot_number, sl.floor_level, sl.section, sl.row_num, pa.area_name
             FROM Parking_Sessions s
             JOIN Parking_Slots sl ON s.slot_id = sl.slot_id
             JOIN Parking_Areas pa ON sl.area_id = pa.area_id
@@ -252,14 +253,58 @@ def find_my_car():
         """, (search_query, search_query), fetch_one=True)
 
         if vehicle_location:
-            # Calculate duration in minutes
             now = datetime.datetime.now()
             entry_dt = datetime.datetime.fromisoformat(str(vehicle_location['entry_time']).replace(' ', 'T'))
             vehicle_location['duration_mins'] = max(1, int((now - entry_dt).total_seconds() / 60))
+            selected_floor = vehicle_location['floor_level']
+
+    # Fetch all Phoenix Mall of Asia slots for this floor to render the full interactive map
+    floor_slots = database.execute_query("""
+        SELECT ps.slot_id, ps.slot_number, ps.floor_level, ps.section, ps.row_num, 
+               ps.supported_vehicle_type, ps.slot_status, ps.is_ev_charging_equipped,
+               v.license_plate, v.make_model
+        FROM Parking_Slots ps
+        LEFT JOIN Parking_Sessions s ON ps.slot_id = s.slot_id AND s.session_status = 'ACTIVE'
+        LEFT JOIN Vehicles v ON s.vehicle_id = v.vehicle_id
+        WHERE ps.area_id = 4 AND ps.floor_level = %s
+        ORDER BY ps.section, ps.row_num, ps.slot_number
+    """, (selected_floor,))
+
+    # If floor has no slots (or other mall), fallback to any slots matching floor or default
+    if not floor_slots:
+        floor_slots = database.execute_query("""
+            SELECT ps.slot_id, ps.slot_number, ps.floor_level, ps.section, ps.row_num, 
+                   ps.supported_vehicle_type, ps.slot_status, ps.is_ev_charging_equipped,
+                   v.license_plate, v.make_model
+            FROM Parking_Slots ps
+            LEFT JOIN Parking_Sessions s ON ps.slot_id = s.slot_id AND s.session_status = 'ACTIVE'
+            LEFT JOIN Vehicles v ON s.vehicle_id = v.vehicle_id
+            WHERE ps.area_id = 4
+            ORDER BY ps.slot_id
+        """)
+
+    # Available floors for mall navigation
+    floors = database.execute_query("""
+        SELECT DISTINCT floor_level FROM Parking_Slots WHERE area_id = 4 ORDER BY floor_level
+    """)
+
+    # Active parked cars quick-list for demo testing
+    active_demo_cars = database.execute_query("""
+        SELECT s.session_id, v.license_plate, v.make_model, sl.slot_number, sl.floor_level, sl.section
+        FROM Parking_Sessions s
+        JOIN Parking_Slots sl ON s.slot_id = sl.slot_id
+        JOIN Vehicles v ON s.vehicle_id = v.vehicle_id
+        WHERE s.session_status = 'ACTIVE' AND sl.area_id = 4
+        LIMIT 4
+    """)
 
     return render_template('user/find_my_car.html', 
                            search_query=search_query, 
-                           vehicle_location=vehicle_location)
+                           vehicle_location=vehicle_location,
+                           selected_floor=selected_floor,
+                           floor_slots=floor_slots,
+                           floors=floors,
+                           active_demo_cars=active_demo_cars)
 
 @app.route('/watchman/login', methods=['GET', 'POST'])
 def watchman_login():

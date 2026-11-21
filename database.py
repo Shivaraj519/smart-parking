@@ -80,6 +80,12 @@ def get_db_connection():
     else:
         import sqlite3
         db_path = os.path.join(os.path.dirname(__file__), 'smart_parking.db')
+        if not os.path.exists(db_path) or os.path.getsize(db_path) == 0:
+            try:
+                import setup_local_db
+                setup_local_db.setup_sqlite()
+            except Exception as e:
+                print("Notice: Auto db setup:", e)
         conn = sqlite3.connect(db_path, check_same_thread=False)
         conn.row_factory = sqlite3.Row
         # Enable foreign key support in SQLite
