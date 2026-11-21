@@ -1,11 +1,21 @@
+import os
 import sqlite3
 import re
 
-def setup_sqlite():
-    conn = sqlite3.connect('smart_parking.db')
+def setup_sqlite(db_path=None):
+    if not db_path:
+        data_dir = os.getenv('DATA_DIR', os.path.dirname(__file__))
+        os.makedirs(data_dir, exist_ok=True)
+        db_path = os.path.join(data_dir, 'smart_parking.db')
+
+    base_dir = os.path.dirname(__file__)
+    schema_file = os.path.join(base_dir, 'schema_sqlite_compat.sql')
+    sample_file = os.path.join(base_dir, 'sample_data.sql')
+
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
-    with open('schema_sqlite_compat.sql', 'r', encoding='utf-8') as f:
+    with open(schema_file, 'r', encoding='utf-8') as f:
         schema = f.read()
 
     # Strip line comments
@@ -61,7 +71,7 @@ def setup_sqlite():
     conn.commit()
 
     # Load sample data
-    with open('sample_data.sql', 'r', encoding='utf-8') as f:
+    with open(sample_file, 'r', encoding='utf-8') as f:
         sample = f.read()
 
     sample = re.sub(r'USE .*?;', '', sample)

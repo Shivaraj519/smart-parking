@@ -79,13 +79,23 @@ def get_db_connection():
             )
     else:
         import sqlite3
-        db_path = os.path.join(os.path.dirname(__file__), 'smart_parking.db')
+        import shutil
+        data_dir = os.getenv('DATA_DIR', os.path.dirname(__file__))
+        os.makedirs(data_dir, exist_ok=True)
+        db_path = os.path.join(data_dir, 'smart_parking.db')
+        local_db = os.path.join(os.path.dirname(__file__), 'smart_parking.db')
         if not os.path.exists(db_path) or os.path.getsize(db_path) == 0:
-            try:
-                import setup_local_db
-                setup_local_db.setup_sqlite()
-            except Exception as e:
-                print("Notice: Auto db setup:", e)
+            if os.path.exists(local_db) and os.path.getsize(local_db) > 0 and db_path != local_db:
+                try:
+                    shutil.copy2(local_db, db_path)
+                except Exception:
+                    pass
+            if not os.path.exists(db_path) or os.path.getsize(db_path) == 0:
+                try:
+                    import setup_local_db
+                    setup_local_db.setup_sqlite(db_path)
+                except Exception as e:
+                    print("Notice: Auto db setup:", e)
         conn = sqlite3.connect(db_path, check_same_thread=False)
         conn.row_factory = sqlite3.Row
         # Enable foreign key support in SQLite
