@@ -4,7 +4,7 @@ from decimal import Decimal
 from functools import wraps
 from flask import (
     Flask, render_template, request, redirect, url_for, 
-    session, flash, jsonify, g
+    session, flash, jsonify, g, send_file
 )
 from werkzeug.security import generate_password_hash, check_password_hash
 import database
@@ -106,6 +106,17 @@ def index():
     """)
 
     return render_template('index.html', stats=stats, areas=areas)
+
+@app.route('/documentation/pdf')
+def download_documentation_pdf():
+    pdf_path = os.path.join(os.path.dirname(__file__), 'ParkSmart_2.0_Complete_Project_Documentation.pdf')
+    if not os.path.exists(pdf_path):
+        try:
+            import generate_pdf_documentation
+            generate_pdf_documentation.generate_pdf()
+        except Exception as e:
+            return f"Error generating PDF: {e}", 500
+    return send_file(pdf_path, as_attachment=True, download_name='ParkSmart_2.0_DBMS_Documentation.pdf')
 
 @app.route('/availability')
 def parking_availability():

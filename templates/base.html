@@ -76,6 +76,9 @@
             </ul>
           </div>
         {% endif %}
+        <a href="{{ url_for('download_documentation_pdf') }}" class="btn btn-outline-orange py-1 px-2 d-none d-lg-inline-flex align-items-center gap-1" style="font-size:0.8rem;" title="Download Academic DBMS Project Report PDF">
+          📄 Project PDF
+        </a>
       </div>
     </div>
   </nav>
@@ -127,6 +130,7 @@
             <li class="mb-2"><a href="{{ url_for('watchman_login') }}" class="text-decoration-none text-muted">Watchman Barrier Portal</a></li>
             <li class="mb-2"><a href="{{ url_for('admin_login') }}" class="text-decoration-none text-muted">Mall Admin Portal</a></li>
             <li class="mb-2"><a href="{{ url_for('find_my_car') }}" class="text-decoration-none text-muted">Find My Car</a></li>
+            <li class="mb-2"><a href="{{ url_for('download_documentation_pdf') }}" class="text-decoration-none text-orange fw-bold">📄 Download Project PDF</a></li>
           </ul>
         </div>
 
