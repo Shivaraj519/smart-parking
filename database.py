@@ -96,11 +96,30 @@ def get_db_connection():
                     setup_local_db.setup_sqlite(db_path)
                 except Exception as e:
                     print("Notice: Auto db setup:", e)
-        conn = sqlite3.connect(db_path, check_same_thread=False)
-        conn.row_factory = sqlite3.Row
-        # Enable foreign key support in SQLite
-        conn.execute("PRAGMA foreign_keys = ON;")
-        return conn
+        try:
+            conn = sqlite3.connect(db_path, check_same_thread=False)
+            conn.row_factory = sqlite3.Row
+            conn.execute("PRAGMA foreign_keys = ON;")
+            # Quick integrity probe
+            conn.execute("SELECT 1 FROM Users LIMIT 1;")
+            return conn
+        except sqlite3.DatabaseError as e:
+            print("Notice: Corrupt/malformed SQLite database detected. Auto-recovering:", e)
+            try:
+                conn.close()
+            except Exception:
+                pass
+            if os.path.exists(db_path):
+                try:
+                    os.remove(db_path)
+                except Exception:
+                    pass
+            import setup_local_db
+            setup_local_db.setup_sqlite(db_path)
+            conn = sqlite3.connect(db_path, check_same_thread=False)
+            conn.row_factory = sqlite3.Row
+            conn.execute("PRAGMA foreign_keys = ON;")
+            return conn
 
 def execute_query(query, params=None, fetch_one=False, fetch_all=True, commit=False):
     """
@@ -158,6 +177,24 @@ def execute_query(query, params=None, fetch_one=False, fetch_all=True, commit=Fa
                 conn.rollback()
             except Exception:
                 pass
+        if driver == 'SQLITE' and 'malformed' in str(e).lower():
+            print("Notice: Malformed database during query. Auto-rebuilding:", e)
+            try:
+                cursor.close()
+                conn.close()
+            except Exception:
+                pass
+            import setup_local_db
+            data_dir = os.getenv('DATA_DIR', os.path.dirname(__file__))
+            db_path = os.path.join(data_dir, 'smart_parking.db')
+            if os.path.exists(db_path):
+                try:
+                    os.remove(db_path)
+                except Exception:
+                    pass
+            setup_local_db.setup_sqlite(db_path)
+            # Re-execute query once with fresh DB
+            return execute_query(query, params=params, fetch_one=fetch_one, fetch_all=fetch_all, commit=commit)
         raise e
     finally:
         cursor.close()
