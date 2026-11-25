@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{% block title %}ParkSmart 2.0 - Premium Mall Parking Platform{% endblock %}</title>
+  <title>{% block title %}ParkSmart 2.0 - Smart Mall Parking Platform{% endblock %}</title>
   
-  <!-- Premium Fonts -->
+  <!-- Premium Fonts: Playfair Display + Inter + Manrope -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,400&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -24,9 +24,10 @@
 </head>
 <body>
 
-  <!-- Premium Navigation Header -->
-  <nav class="navbar-custom">
-    <div class="container-fluid d-flex justify-content-between align-items-center">
+  <!-- Floating Island Navbar -->
+  <header class="navbar-wrapper">
+    <nav class="navbar-floating-pill d-flex justify-content-between align-items-center">
+      <!-- Brand Logo -->
       <a href="{{ url_for('index') }}" class="brand-badge">
         <div class="brand-icon-box">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
@@ -34,57 +35,67 @@
           </svg>
         </div>
         <span>PARKSMART</span>
-        <span class="version-tag">MALL 2.0</span>
+        <span class="version-pill">MALL 2.0</span>
       </a>
 
+      <!-- Center Telemetry Pill (Desktop) -->
+      <div class="d-none d-xl-flex align-items-center gap-2">
+        <div class="telemetry-indicator" title="Live RFID & Ultrasonic Sensors Active">
+          <span class="telemetry-dot"></span>
+          <span>PHOENIX MALL SENSORS LIVE</span>
+        </div>
+      </div>
+
+      <!-- Navigation Actions -->
       <div class="d-flex align-items-center gap-2">
-        <a href="{{ url_for('parking_availability') }}" class="nav-link-custom">Live Availability</a>
-        <a href="{{ url_for('find_my_car') }}" class="nav-link-custom">Find My Car</a>
+        <a href="{{ url_for('parking_availability') }}" class="nav-link-pill">Live Availability</a>
+        <a href="{{ url_for('find_my_car') }}" class="nav-link-pill">📍 Find My Car</a>
         
         {% if session.get('user_id') %}
-          <a href="{{ url_for('user_dashboard') }}" class="nav-link-custom">Driver Dashboard</a>
-          <a href="{{ url_for('user_vehicles') }}" class="nav-link-custom">My Vehicles</a>
-          <a href="{{ url_for('user_booking_history') }}" class="nav-link-custom">Reservations</a>
+          <a href="{{ url_for('user_dashboard') }}" class="nav-link-pill d-none d-md-inline-flex">Driver Dashboard</a>
+          <a href="{{ url_for('user_vehicles') }}" class="nav-link-pill d-none d-lg-inline-flex">Garage</a>
           
-          <div class="dropdown ms-2">
-            <button class="btn btn-outline-orange dropdown-toggle py-1 px-3" type="button" data-bs-toggle="dropdown">
+          <div class="dropdown ms-1">
+            <button class="btn-outline-orange py-1 px-3 dropdown-toggle" type="button" data-bs-toggle="dropdown" style="font-size:0.85rem;">
               👤 {{ session.get('user_name', 'Driver') }} (₹{{ "%.2f"|format(session.get('wallet_balance', 0.0)) }})
             </button>
-            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0" style="background: #FFFFFF; border-radius: 12px;">
-              <li><a class="dropdown-item" href="{{ url_for('user_dashboard') }}">My Dashboard</a></li>
-              <li><a class="dropdown-item" href="{{ url_for('user_payments') }}">Payment Ledger</a></li>
+            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 glass-panel p-2 mt-2" style="border-radius: 16px; min-width: 220px;">
+              <li><a class="dropdown-item rounded-pill mb-1" href="{{ url_for('user_dashboard') }}">My Dashboard</a></li>
+              <li><a class="dropdown-item rounded-pill mb-1" href="{{ url_for('user_booking_history') }}">Reservations</a></li>
+              <li><a class="dropdown-item rounded-pill mb-1" href="{{ url_for('user_payments') }}">Wallet & Invoices</a></li>
               <li><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item text-danger" href="{{ url_for('logout') }}">Sign Out</a></li>
+              <li><a class="dropdown-item rounded-pill text-danger" href="{{ url_for('logout') }}">Sign Out</a></li>
             </ul>
           </div>
         {% elif session.get('watchman_id') %}
-          <a href="{{ url_for('watchman_dashboard') }}" class="btn btn-orange py-1 px-3">Gate Watchman Console</a>
-          <a href="{{ url_for('logout') }}" class="nav-link-custom text-muted">Logout</a>
+          <a href="{{ url_for('watchman_dashboard') }}" class="btn-orange py-1 px-3" style="font-size:0.85rem;">🛡️ Gate Terminal</a>
+          <a href="{{ url_for('logout') }}" class="nav-link-pill text-muted">Logout</a>
         {% elif session.get('admin_id') %}
-          <a href="{{ url_for('admin_dashboard') }}" class="btn btn-espresso py-1 px-3">Admin Portal</a>
-          <a href="{{ url_for('logout') }}" class="nav-link-custom text-muted">Logout (Admin)</a>
+          <a href="{{ url_for('admin_dashboard') }}" class="btn-espresso py-1 px-3" style="font-size:0.85rem;">🏢 Admin Console</a>
+          <a href="{{ url_for('logout') }}" class="nav-link-pill text-muted">Logout</a>
         {% else %}
-          <a href="{{ url_for('login') }}" class="nav-link-custom">Log In</a>
-          <a href="{{ url_for('register') }}" class="btn-orange">Book Parking</a>
+          <a href="{{ url_for('login') }}" class="nav-link-pill">Log In</a>
+          <a href="{{ url_for('register') }}" class="btn-orange py-1 px-3" style="font-size:0.85rem;">Book Parking</a>
           <div class="dropdown d-inline">
-            <button class="btn btn-outline-orange py-1 px-2 dropdown-toggle" type="button" data-bs-toggle="dropdown" style="font-size:0.8rem;">
-              Staff Portals
+            <button class="btn-outline-orange py-1 px-2 dropdown-toggle" type="button" data-bs-toggle="dropdown" style="font-size:0.8rem;">
+              Staff
             </button>
-            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0" style="border-radius:10px;">
-              <li><a class="dropdown-item" href="{{ url_for('watchman_login') }}">🛡️ Watchman Portal</a></li>
-              <li><a class="dropdown-item" href="{{ url_for('admin_login') }}">🏢 Mall Admin Portal</a></li>
+            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 glass-panel p-2 mt-2" style="border-radius:14px;">
+              <li><a class="dropdown-item rounded-pill" href="{{ url_for('watchman_login') }}">🛡️ Watchman Barrier Portal</a></li>
+              <li><a class="dropdown-item rounded-pill" href="{{ url_for('admin_login') }}">🏢 Mall Admin Operations</a></li>
             </ul>
           </div>
         {% endif %}
-        <a href="{{ url_for('download_documentation_pdf') }}" class="btn btn-outline-orange py-1 px-2 d-none d-lg-inline-flex align-items-center gap-1" style="font-size:0.8rem;" title="Download Academic DBMS Project Report PDF">
-          📄 Project PDF
+
+        <a href="{{ url_for('download_documentation_pdf') }}" class="btn-outline-orange py-1 px-2 d-none d-lg-inline-flex" style="font-size:0.8rem;" title="Download Academic DBMS Project Report PDF">
+          📄 PDF Report
         </a>
       </div>
-    </div>
-  </nav>
+    </nav>
+  </header>
 
   <!-- Flash Messaging Notifications -->
-  <div class="container mt-3">
+  <div class="container mt-4">
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
         {% for category, message in messages %}
@@ -98,11 +109,11 @@
   </div>
 
   <!-- Main Body Content Block -->
-  <main>
+  <main class="main-content-wrapper">
     {% block content %}{% endblock %}
   </main>
 
-  <!-- Premium Mall Platform Footer -->
+  <!-- Luxury Mall Platform Footer -->
   <footer class="mt-5 py-5 border-top" style="background-color: var(--bg-card); border-color: var(--border-subtle) !important;">
     <div class="container">
       <div class="row g-4 justify-content-between mb-4">
@@ -118,24 +129,24 @@
           <p class="text-muted" style="font-size: 0.9rem;">
             Enterprise Smart Mall Parking Platform deployed with multi-zone availability, watchman barcode scanning, and indoor vehicle wayfinding.
           </p>
-          <div class="badge px-3 py-1" style="background: var(--accent-orange-light); color: var(--accent-terracotta); font-weight:700;">
+          <div class="badge px-3 py-2" style="background: var(--accent-orange-light); color: var(--accent-terracotta); font-weight:700; border-radius: 9999px;">
             📍 Demonstration Hub: Phoenix Mall of Asia, Bengaluru
           </div>
         </div>
 
         <div class="col-lg-2 col-6">
-          <h6 class="card-label mb-3">PORTALS</h6>
+          <h6 class="card-label mb-3">SYSTEM PORTALS</h6>
           <ul class="list-unstyled" style="font-size: 0.88rem;">
             <li class="mb-2"><a href="{{ url_for('parking_availability') }}" class="text-decoration-none text-muted">Customer Portal</a></li>
             <li class="mb-2"><a href="{{ url_for('watchman_login') }}" class="text-decoration-none text-muted">Watchman Barrier Portal</a></li>
             <li class="mb-2"><a href="{{ url_for('admin_login') }}" class="text-decoration-none text-muted">Mall Admin Portal</a></li>
             <li class="mb-2"><a href="{{ url_for('find_my_car') }}" class="text-decoration-none text-muted">Find My Car</a></li>
-            <li class="mb-2"><a href="{{ url_for('download_documentation_pdf') }}" class="text-decoration-none text-orange fw-bold">📄 Download Project PDF</a></li>
+            <li class="mb-2"><a href="{{ url_for('download_documentation_pdf') }}" class="text-decoration-none text-orange fw-bold">📄 Download PDF Report</a></li>
           </ul>
         </div>
 
-        <div class="col-lg-2 col-6">
-          <h6 class="card-label mb-3">SYSTEM ARCHITECTURE</h6>
+        <div class="col-lg-3 col-6">
+          <h6 class="card-label mb-3">DBMS ARCHITECTURE</h6>
           <ul class="list-unstyled" style="font-size: 0.88rem;">
             <li class="mb-2 text-muted">3NF Normalized Relational Core</li>
             <li class="mb-2 text-muted">Pessimistic Concurrency Locking</li>
@@ -162,32 +173,17 @@
   
   <!-- Interactive Scroll Reveal & Animations Script -->
   <script>
-  document.addEventListener('DOMContentLoaded', function() {
-    // Scroll reveal observer
-    const reveals = document.querySelectorAll('.reveal-on-scroll');
-    if ('IntersectionObserver' in window && reveals.length > 0) {
-      const observer = new IntersectionObserver((entries, obs) => {
+    document.addEventListener('DOMContentLoaded', () => {
+      const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
           if (entry.isIntersecting) {
-            entry.target.classList.add('is-visible');
-            obs.unobserve(entry.target);
+            entry.target.classList.add('revealed');
           }
         });
-      }, { threshold: 0.12 });
+      }, { threshold: 0.1 });
 
-      reveals.forEach(el => observer.observe(el));
-    } else {
-      reveals.forEach(el => el.classList.add('is-visible'));
-    }
-
-    // Interactive Hover Tilt Effect for Glass Cards
-    const glassCards = document.querySelectorAll('.glass-card, .map-bay');
-    glassCards.forEach(card => {
-      card.addEventListener('mouseenter', function() {
-        this.style.transition = 'transform 0.25s ease, box-shadow 0.25s ease';
-      });
+      document.querySelectorAll('.reveal-on-scroll').forEach(el => observer.observe(el));
     });
-  });
   </script>
   {% block extra_js %}{% endblock %}
 </body>

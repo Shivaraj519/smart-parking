@@ -4,147 +4,95 @@
 {% block extra_css %}
 <style>
 /* ==========================================================================
-   ADVANCED MALL INDOOR MAP & GLASSMORPHISM STYLES
+   ARCHITECTURAL SMART MALL INDOOR MAP
    ========================================================================== */
-.glass-panel {
-  background: rgba(255, 255, 255, 0.72) !important;
-  backdrop-filter: blur(16px) saturate(180%);
-  -webkit-backdrop-filter: blur(16px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.6) !important;
-  box-shadow: 0 8px 32px 0 rgba(41, 35, 31, 0.08) !important;
+.wayfinding-hero {
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: 1.5rem;
+  margin-bottom: 2rem;
 }
 
-.glass-panel-dark {
-  background: rgba(41, 35, 31, 0.88) !important;
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.12) !important;
-  color: #FAF6EF;
-}
-
-.map-viewport {
-  background: radial-gradient(circle at 50% 50%, #FAF6EF 0%, #EDE0CF 100%);
-  border-radius: 24px;
-  border: 2px solid var(--border-strong);
-  position: relative;
-  overflow: hidden;
-  box-shadow: inset 0 2px 8px rgba(0,0,0,0.06);
-  min-height: 580px;
-}
-
-/* Floor switcher pill buttons */
-.floor-pill {
-  padding: 0.55rem 1.1rem;
-  border-radius: 30px;
-  font-weight: 600;
-  font-size: 0.85rem;
-  text-decoration: none;
-  color: var(--text-charcoal);
-  background: rgba(255, 255, 255, 0.65);
+.map-control-card {
+  background: var(--bg-surface);
   border: 1px solid var(--border-subtle);
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-card);
 }
 
-.floor-pill:hover, .floor-pill.active {
-  background: var(--accent-orange);
-  color: #FFFFFF;
-  border-color: var(--accent-orange);
-  box-shadow: 0 4px 14px var(--accent-orange-glow);
-  transform: translateY(-2px);
-}
-
-/* 3D-styled bay slots in indoor map */
-.map-bay {
-  border-radius: 12px;
+.architectural-bay-slot {
+  background: #FFFFFF;
+  border-radius: var(--radius-sm);
   padding: 0.85rem 0.6rem;
   text-align: center;
   position: relative;
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   cursor: pointer;
-  user-select: none;
-  background: #FFFFFF;
   border: 2px solid;
+  user-select: none;
 }
 
-.map-bay:hover {
+.architectural-bay-slot:hover {
   transform: translateY(-4px) scale(1.02);
   z-index: 10;
-  box-shadow: 0 12px 24px rgba(41, 35, 31, 0.12);
+  box-shadow: var(--shadow-hover);
 }
 
-.map-bay.status-available {
-  background: rgba(232, 245, 235, 0.85);
-  border-color: #81C784;
-  color: #19693B;
+.architectural-bay-slot.status-available {
+  background: linear-gradient(180deg, #FFFFFF 40%, var(--status-available-bg) 100%);
+  border-color: var(--status-available-border);
+  color: var(--status-available-text);
 }
 
-.map-bay.status-occupied {
-  background: rgba(253, 240, 237, 0.85);
-  border-color: #F3B5A9;
-  color: #B43825;
+.architectural-bay-slot.status-occupied {
+  background: linear-gradient(180deg, #FFFFFF 40%, var(--status-occupied-bg) 100%);
+  border-color: var(--status-occupied-border);
+  color: var(--status-occupied-text);
 }
 
-.map-bay.status-reserved {
-  background: rgba(255, 245, 236, 0.85);
-  border-color: #F7CA9B;
-  color: #C45F1B;
+.architectural-bay-slot.status-reserved {
+  background: linear-gradient(180deg, #FFFFFF 40%, var(--status-reserved-bg) 100%);
+  border-color: var(--status-reserved-border);
+  color: var(--status-reserved-text);
 }
 
-.map-bay.target-vehicle-bay {
-  background: linear-gradient(135deg, #FFF9F0, #FFE6D0) !important;
+.architectural-bay-slot.target-vehicle-bay {
+  background: linear-gradient(135deg, #FFF9F2, #FFE4CE) !important;
   border: 3px solid var(--accent-orange) !important;
-  box-shadow: 0 0 0 6px var(--accent-orange-glow), 0 12px 30px rgba(217, 119, 54, 0.35) !important;
-  animation: glow-pulse 2s infinite ease-in-out;
+  box-shadow: 0 0 0 6px var(--accent-orange-glow), 0 16px 36px rgba(217, 119, 54, 0.4) !important;
+  animation: target-pulse 2s infinite ease-in-out;
   transform: scale(1.04);
   z-index: 20;
 }
 
-@keyframes glow-pulse {
+@keyframes target-pulse {
   0% { box-shadow: 0 0 0 4px var(--accent-orange-glow), 0 8px 20px rgba(217, 119, 54, 0.25); }
-  50% { box-shadow: 0 0 0 12px rgba(217, 119, 54, 0.3), 0 16px 36px rgba(217, 119, 54, 0.45); }
+  50% { box-shadow: 0 0 0 14px rgba(217, 119, 54, 0.35), 0 18px 40px rgba(217, 119, 54, 0.5); }
   100% { box-shadow: 0 0 0 4px var(--accent-orange-glow), 0 8px 20px rgba(217, 119, 54, 0.25); }
 }
 
-/* Walking route animated SVG path */
-.walking-route-line {
-  stroke-dasharray: 8 6;
-  animation: dash-flow 1.4s linear infinite;
+.walking-path-hud {
+  background: var(--bg-sidebar);
+  color: #FAF6EF;
+  border-radius: var(--radius-md);
+  padding: 1.2rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
 }
 
-@keyframes dash-flow {
-  to { stroke-dashoffset: -28; }
-}
-
-/* Mall Landmarks */
-.mall-landmark {
-  background: rgba(255, 255, 255, 0.85);
-  border: 1px solid var(--border-strong);
-  border-radius: 12px;
-  padding: 0.6rem 0.9rem;
-  font-size: 0.76rem;
-  font-weight: 700;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.04);
-}
-
-.compass-rose {
-  width: 48px;
-  height: 48px;
+.compass-hub {
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.85);
-  border: 1px solid var(--border-strong);
+  background: #FFFFFF;
+  border: 1px solid var(--border-medium);
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 800;
   color: var(--accent-terracotta);
   font-size: 0.85rem;
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-subtle);
 }
 </style>
 {% endblock %}
@@ -152,19 +100,19 @@
 {% block content %}
 <div class="container py-4">
   <!-- Top Editorial Header with Mall Badge -->
-  <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3 animate-fade-in">
+  <div class="d-flex flex-wrap justify-content-between align-items-center wayfinding-hero gap-3">
     <div>
-      <div class="d-inline-flex align-items-center gap-2 px-3 py-1 mb-2 rounded-pill" style="background-color: var(--accent-orange-light); border: 1px solid var(--border-subtle);">
+      <div class="d-inline-flex align-items-center gap-2 px-3 py-1 mb-2 rounded-pill" style="background-color: var(--accent-orange-light); border: 1px solid var(--border-medium);">
         <span>🧭</span>
-        <span style="font-size: 0.78rem; font-weight: 700; color: var(--accent-terracotta); letter-spacing: 0.05em;">SMART WAYFINDING ENGINE</span>
+        <span style="font-size: 0.78rem; font-weight: 800; color: var(--accent-terracotta); letter-spacing: 0.08em;">INDOOR DIGITAL SPATIAL POSITIONING</span>
       </div>
       <h2 class="serif-heading mb-1 display-6">Interactive Mall Wayfinding & Find My Car</h2>
       <p class="text-muted mb-0">Multi-level spatial positioning and pedestrian routing across Phoenix Mall of Asia, Bengaluru.</p>
     </div>
     
     <div class="d-flex align-items-center gap-2">
-      <div class="badge px-3 py-2" style="background: var(--text-espresso); color: #FFFFFF; font-weight: 600; font-size: 0.85rem; border-radius: 10px;">
-        📍 Phoenix Mall of Asia (Gates 1 & 2 Live)
+      <div class="badge px-3 py-2" style="background: var(--text-espresso); color: #FFFFFF; font-weight: 600; font-size: 0.85rem; border-radius: var(--radius-full);">
+        📍 Phoenix Mall of Asia &bull; Gates 1 & 2 Live
       </div>
     </div>
   </div>
@@ -174,28 +122,28 @@
     <!-- Left Column: Search Form, Vehicle Details, & Route Instructions -->
     <div class="col-lg-4">
       <!-- Search Card with Glassmorphism -->
-      <div class="custom-card glass-panel p-4 mb-4">
-        <h5 class="fw-bold mb-1" style="color: var(--text-espresso);">Locate Vehicle</h5>
+      <div class="map-control-card mb-4">
+        <h5 class="fw-bold mb-1" style="color: var(--text-espresso);">Locate Parked Vehicle</h5>
         <p class="text-muted" style="font-size: 0.84rem;">Enter license plate or booking pass to track your parked bay on the floor plan.</p>
 
         <form method="GET" action="{{ url_for('find_my_car') }}">
           <div class="mb-3">
             <label class="card-label">LICENSE NUMBER OR PASS CODE</label>
-            <div class="input-group">
-              <input type="text" name="search_query" id="vehicleSearchInput" class="form-control font-monospace text-uppercase" placeholder="e.g. KA01MH1001" value="{{ search_query }}" required>
-              <button class="btn btn-orange px-3" type="submit">Locate</button>
+            <div class="input-group mt-1">
+              <input type="text" name="search_query" id="vehicleSearchInput" class="form-control-custom font-monospace text-uppercase" placeholder="e.g. KA01MH1001" value="{{ search_query }}" required>
+              <button class="btn-orange px-4 ms-2" type="submit">Locate</button>
             </div>
           </div>
         </form>
 
         <!-- Quick Demo Car Chips -->
-        <div class="pt-2 border-top" style="border-color: var(--border-subtle) !important;">
+        <div class="pt-3 border-top" style="border-color: var(--border-subtle) !important;">
           <small class="card-label d-block mb-2">QUICK TEST WITH PARKED VEHICLES:</small>
           <div class="d-flex flex-wrap gap-2">
             {% for dc in active_demo_cars %}
             <a href="{{ url_for('find_my_car') }}?search_query={{ dc.license_plate }}" 
-               class="badge text-decoration-none px-2 py-1 {% if search_query == dc.license_plate %}bg-warning text-dark{% else %}bg-light text-dark border{% endif %}"
-               style="font-size: 0.75rem; font-family: var(--font-mono);">
+               class="badge text-decoration-none px-2 py-1 {% if search_query == dc.license_plate %}bg-warning text-dark fw-bold{% else %}bg-light text-dark border{% endif %}"
+               style="font-size: 0.78rem; font-family: var(--font-mono); border-radius: var(--radius-full);">
               🚗 {{ dc.license_plate }} ({{ dc.slot_number }})
             </a>
             {% endfor %}
@@ -205,27 +153,27 @@
 
       <!-- Vehicle Pinpointed Status Card -->
       {% if vehicle_location %}
-      <div class="custom-card glass-panel p-4 mb-4 animate-fade-in" style="border: 2px solid var(--accent-orange) !important;">
+      <div class="custom-card p-4 mb-4" style="border: 2px solid var(--accent-orange) !important;">
         <div class="d-flex justify-content-between align-items-start border-bottom pb-3 mb-3" style="border-color: var(--border-subtle) !important;">
           <div>
-            <span class="badge bg-success mb-1" style="font-size: 0.68rem;">VEHICLE GROUNDED & VERIFIED</span>
-            <h4 class="fw-bold mb-0 font-monospace text-primary">{{ vehicle_location.license_plate }}</h4>
-            <div class="text-muted" style="font-size: 0.82rem;">{{ vehicle_location.make_model or vehicle_location.vehicle_type }}</div>
+            <span class="badge bg-success mb-1" style="font-size: 0.7rem; border-radius: 9999px;">VEHICLE GROUNDED & VERIFIED</span>
+            <h3 class="fw-bold mb-0 font-monospace text-primary" style="letter-spacing: -0.02em;">{{ vehicle_location.license_plate }}</h3>
+            <div class="text-muted" style="font-size: 0.85rem;">{{ vehicle_location.make_model or vehicle_location.vehicle_type }}</div>
           </div>
           <div class="text-end">
             <span class="card-label d-block mb-0">BAY ID</span>
-            <div class="h3 font-monospace text-danger fw-bold mb-0">{{ vehicle_location.slot_number }}</div>
+            <div class="h2 font-monospace text-danger fw-bold mb-0">{{ vehicle_location.slot_number }}</div>
           </div>
         </div>
 
-        <div class="row g-2 mb-3" style="font-size: 0.86rem;">
+        <div class="row g-2 mb-3" style="font-size: 0.88rem;">
           <div class="col-6">
             <span class="text-muted d-block" style="font-size: 0.72rem;">LEVEL & ZONE</span>
             <strong>{{ vehicle_location.floor_level }}</strong>
           </div>
           <div class="col-6">
             <span class="text-muted d-block" style="font-size: 0.72rem;">SECTION & ROW</span>
-            <span class="badge bg-light text-dark border font-monospace">Sec {{ vehicle_location.section or 'A' }} • {{ vehicle_location.row_num or 'Row 1' }}</span>
+            <span class="badge bg-light text-dark border font-monospace">Sec {{ vehicle_location.section or 'A' }} &bull; {{ vehicle_location.row_num or 'Row 1' }}</span>
           </div>
           <div class="col-12 mt-2">
             <span class="text-muted d-block" style="font-size: 0.72rem;">CHECK-IN TIMESTAMP & DURATION</span>
@@ -234,12 +182,12 @@
         </div>
 
         <!-- Walking Step-by-Step Wayfinding Guidance -->
-        <div class="p-3 rounded" style="background-color: var(--accent-orange-light); border: 1px solid var(--border-strong);">
+        <div class="p-3 rounded" style="background-color: var(--accent-orange-light); border: 1px solid var(--border-medium); border-radius: var(--radius-md);">
           <div class="d-flex align-items-center gap-2 mb-2">
-            <span style="font-size:1.1rem;">🚶</span>
-            <strong style="color: var(--accent-terracotta); font-size: 0.88rem;">Pedestrian Route From Central Atrium:</strong>
+            <span style="font-size:1.2rem;">🚶</span>
+            <strong style="color: var(--accent-terracotta); font-size: 0.9rem;">Pedestrian Route From Central Atrium:</strong>
           </div>
-          <ol class="mb-0 ps-3" style="font-size: 0.82rem; color: var(--text-charcoal); line-height: 1.5;">
+          <ol class="mb-0 ps-3" style="font-size: 0.84rem; color: var(--text-charcoal); line-height: 1.55;">
             <li class="mb-1">Take <strong>Lobby B Lift / Escalator</strong> down to <strong>{{ vehicle_location.floor_level }}</strong>.</li>
             <li class="mb-1">Step out towards the parking foyer and turn toward <strong>Pillar Section {{ vehicle_location.section or 'A' }}</strong>.</li>
             <li>Follow the green pedestrian walkway down <strong>{{ vehicle_location.row_num or 'Row 1' }}</strong>. Bay <strong>{{ vehicle_location.slot_number }}</strong> will be directly marked with glowing sensors.</li>
@@ -247,64 +195,61 @@
         </div>
       </div>
       {% elif search_query %}
-      <div class="custom-card glass-panel p-4 mb-4 text-center text-muted">
-        <div style="font-size: 2rem;" class="mb-2">🔍</div>
+      <div class="custom-card p-4 mb-4 text-center text-muted">
+        <div style="font-size: 2.2rem;" class="mb-2">🔍</div>
         <h6 class="fw-bold mb-1">Vehicle Not Currently Parked</h6>
         <p class="mb-2" style="font-size: 0.84rem;">No active session matched <strong>{{ search_query }}</strong> at Phoenix Mall of Asia.</p>
-        <small>Try selecting one of the demo plates above to see the route.</small>
+        <small>Select one of the demo plates above to see the route.</small>
       </div>
       {% endif %}
 
       <!-- Floor Plan Legend Card -->
-      <div class="custom-card glass-panel p-3">
-        <span class="card-label d-block mb-2">MAP LEGEND & SENSORS</span>
-        <div class="d-flex flex-column gap-2" style="font-size: 0.8rem;">
+      <div class="map-control-card">
+        <span class="card-label d-block mb-3">MAP SENSOR STATES & LEGEND</span>
+        <div class="d-flex flex-column gap-2" style="font-size: 0.82rem;">
           <div class="d-flex align-items-center gap-2">
-            <span class="d-inline-block rounded-circle" style="width:12px; height:12px; background:#19693B;"></span>
-            <span><strong>Available Bay</strong> — Free for booking & drive-in</span>
+            <span class="d-inline-block rounded-circle" style="width:12px; height:12px; background:#19693B; box-shadow: 0 0 6px #19693B;"></span>
+            <span><strong>Available Bay</strong> &mdash; Free for booking & drive-in</span>
           </div>
           <div class="d-flex align-items-center gap-2">
-            <span class="d-inline-block rounded-circle" style="width:12px; height:12px; background:#B43825;"></span>
-            <span><strong>Occupied Bay</strong> — Active vehicle parked</span>
+            <span class="d-inline-block rounded-circle" style="width:12px; height:12px; background:#B43825; box-shadow: 0 0 6px #B43825;"></span>
+            <span><strong>Occupied Bay</strong> &mdash; Active vehicle parked</span>
           </div>
           <div class="d-flex align-items-center gap-2">
-            <span class="d-inline-block rounded-circle" style="width:12px; height:12px; background:#C45F1B;"></span>
-            <span><strong>Reserved Bay</strong> — Pre-booked arrival expected</span>
+            <span class="d-inline-block rounded-circle" style="width:12px; height:12px; background:#C45F1B; box-shadow: 0 0 6px #C45F1B;"></span>
+            <span><strong>Reserved Bay</strong> &mdash; Pre-booked arrival expected</span>
           </div>
           <div class="d-flex align-items-center gap-2">
             <span class="badge bg-warning text-dark px-2">📍 Target Pin</span>
-            <span><strong>Your Vehicle</strong> with active pulse indicator</span>
+            <span><strong>Your Vehicle</strong> with active beacon radar</span>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Right Column: Interactive 3D Spatial Indoor Mall Map -->
+    <!-- Right Column: Interactive Architectural Indoor Mall Map -->
     <div class="col-lg-8">
-      <div class="map-viewport p-4 d-flex flex-column justify-content-between">
-        <!-- Top Toolbar: Floor Switcher & Mall Amenities -->
+      <div class="architectural-viewport p-4 d-flex flex-column justify-content-between">
+        <!-- Top Toolbar: Floor Switcher & Mall Landmarks -->
         <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 pb-3 border-bottom" style="border-color: rgba(214, 194, 172, 0.6) !important;">
-          <!-- Floor Switcher Pills -->
-          <div class="d-flex flex-wrap gap-2 align-items-center">
-            <span class="card-label me-1 mb-0">LEVEL:</span>
+          <!-- Floor Switcher Bar -->
+          <div class="floor-switcher-bar">
             {% for fl in floors %}
             <a href="{{ url_for('find_my_car') }}?floor={{ fl.floor_level }}{% if search_query %}&search_query={{ search_query }}{% endif %}" 
-               class="floor-pill {% if selected_floor == fl.floor_level %}active{% endif %}">
-              {{ fl.floor_level.split('(')[0].strip() }}
+               class="floor-pill-btn {% if selected_floor == fl.floor_level %}active{% endif %}">
+              🏢 {{ fl.floor_level.split('(')[0].strip() }}
             </a>
             {% endfor %}
           </div>
 
-          <!-- Compass & Sensor Status -->
+          <!-- Compass & Landmarks -->
           <div class="d-flex align-items-center gap-3">
-            <div class="compass-rose" title="North Orientation">N ↑</div>
-            <div class="mall-landmark">
-              <span>🚪</span>
-              <span>LOBBY B LIFTS</span>
+            <div class="compass-hub" title="North Orientation">N ↑</div>
+            <div class="badge px-3 py-2 bg-white text-dark border shadow-sm" style="border-radius: var(--radius-full); font-size: 0.8rem;">
+              🚪 LOBBY B ELEVATORS
             </div>
-            <div class="mall-landmark">
-              <span>⚡</span>
-              <span>EV CHARGERS</span>
+            <div class="badge px-3 py-2 bg-white text-dark border shadow-sm" style="border-radius: var(--radius-full); font-size: 0.8rem;">
+              ⚡ EV SUPERCHARGERS
             </div>
           </div>
         </div>
@@ -312,13 +257,10 @@
         <!-- Central Indoor Parking Level Layout -->
         <div class="my-4 position-relative">
           <!-- Entrance Gateway Indicator -->
-          <div class="d-flex justify-content-between align-items-center mb-3 text-muted" style="font-size: 0.78rem;">
-            <div class="px-3 py-1 rounded bg-white shadow-sm border font-monospace">
-              ⬅ INBOUND VEHICLE RAMP (GATE 1)
-            </div>
-            <div class="px-3 py-1 rounded bg-white shadow-sm border font-monospace">
-              OUTBOUND EXIT BARRIER (GATE 2) ➡
-            </div>
+          <div class="driveway-lane">
+            <span>⬅ INBOUND VEHICLE RAMP (GATE 1)</span>
+            <div class="pedestrian-crosswalk flex-grow-1 mx-4"></div>
+            <span>OUTBOUND EXIT BARRIER (GATE 2) ➡</span>
           </div>
 
           <!-- Spatial Parking Bays Grid Container -->
@@ -326,31 +268,31 @@
             {% for slot in floor_slots %}
             {% set is_target = vehicle_location and vehicle_location.slot_number == slot.slot_number %}
             <div class="col-md-3 col-sm-4 col-6">
-              <div class="map-bay status-{{ slot.slot_status|lower }} {% if is_target %}target-vehicle-bay{% endif %}"
+              <div class="architectural-bay-slot status-{{ slot.slot_status|lower }} {% if is_target %}target-vehicle-bay{% endif %}"
                    onclick="showBayInspectModal('{{ slot.slot_number }}', '{{ slot.floor_level }}', '{{ slot.section }}', '{{ slot.row_num }}', '{{ slot.slot_status }}', '{{ slot.supported_vehicle_type }}', '{{ slot.license_plate or 'None' }}', '{{ slot.make_model or 'None' }}', '{{ slot.is_ev_charging_equipped }}')">
                 
                 <!-- Section Badge & EV Tag -->
-                <div class="d-flex justify-content-between align-items-center mb-1" style="font-size: 0.66rem;">
-                  <span class="badge bg-light text-dark border">SEC-{{ slot.section }}</span>
+                <div class="d-flex justify-content-between align-items-center mb-1" style="font-size: 0.68rem;">
+                  <span class="badge bg-white text-dark border">SEC-{{ slot.section }}</span>
                   {% if slot.is_ev_charging_equipped %}
-                    <span class="badge bg-success" style="font-size:0.6rem;">⚡ EV</span>
+                    <span class="badge bg-success" style="font-size:0.62rem;">⚡ EV DOCK</span>
                   {% endif %}
                 </div>
 
                 <!-- Slot Number Identifier -->
-                <div class="font-monospace fw-bold" style="font-size: 1.05rem;">
+                <div class="font-monospace fw-bold my-1" style="font-size: 1.15rem; letter-spacing: -0.02em;">
                   {{ slot.slot_number }}
                 </div>
 
                 <!-- Status / Occupant Info -->
-                <div class="mt-1" style="font-size: 0.72rem; font-weight: 600;">
+                <div class="mt-1" style="font-size: 0.74rem; font-weight: 600;">
                   {% if is_target %}
                     <span class="badge bg-danger text-white py-1 px-2 d-block my-1 shadow-sm">📍 YOUR VEHICLE</span>
                     <strong class="font-monospace text-dark d-block">{{ slot.license_plate }}</strong>
                   {% elif slot.slot_status == 'OCCUPIED' %}
                     <span class="badge badge-occupied">OCCUPIED</span>
                     {% if slot.license_plate %}
-                      <small class="font-monospace d-block text-muted" style="font-size: 0.68rem;">{{ slot.license_plate }}</small>
+                      <small class="font-monospace d-block text-muted mt-1" style="font-size: 0.7rem;">{{ slot.license_plate }}</small>
                     {% endif %}
                   {% elif slot.slot_status == 'RESERVED' %}
                     <span class="badge badge-reserved">RESERVED</span>
@@ -365,23 +307,23 @@
 
           <!-- Animated Walking Route Indicator SVG if vehicle is pinpointed on this floor -->
           {% if vehicle_location and vehicle_location.floor_level == selected_floor %}
-          <div class="p-3 mt-4 rounded glass-panel-dark text-white d-flex align-items-center justify-content-between">
+          <div class="walking-path-hud mt-4 d-flex align-items-center justify-content-between">
             <div class="d-flex align-items-center gap-3">
-              <div class="mall-wayfinding-marker">📍</div>
+              <div style="font-size: 1.6rem;">📍</div>
               <div>
-                <strong class="d-block" style="font-size: 0.95rem;">Active Pedestrian Walking Guidance Engaged</strong>
+                <strong class="d-block" style="font-size: 0.96rem;">Active Pedestrian Guidance Engaged</strong>
                 <small class="text-white-50">Route from Lobby B Elevators to Bay {{ vehicle_location.slot_number }} (Section {{ vehicle_location.section }}, {{ vehicle_location.row_num }})</small>
               </div>
             </div>
-            <span class="badge bg-warning text-dark font-monospace px-3 py-2">EST. WALK: 2 MINS</span>
+            <span class="badge bg-warning text-dark font-monospace px-3 py-2" style="font-size:0.85rem;">EST. WALK: 2 MINS</span>
           </div>
           {% endif %}
         </div>
 
         <!-- Bottom Corridor Nav Status -->
-        <div class="d-flex justify-content-between align-items-center pt-3 border-top" style="border-color: rgba(214, 194, 172, 0.6) !important; font-size: 0.78rem;">
+        <div class="d-flex justify-content-between align-items-center pt-3 border-top" style="border-color: rgba(214, 194, 172, 0.6) !important; font-size: 0.8rem;">
           <span class="text-muted">Active Zone: <strong>{{ selected_floor }}</strong></span>
-          <span class="text-muted">Total Bays on Level: <strong>{{ floor_slots|length }}</strong></span>
+          <span class="text-muted">Total Monitored Bays: <strong>{{ floor_slots|length }}</strong></span>
           <span class="text-success fw-bold">● RFID & Ultrasonic Sensors Online</span>
         </div>
       </div>
@@ -392,7 +334,7 @@
 <!-- Modal for Inspecting Any Bay on the Map -->
 <div class="modal fade" id="bayInspectModal" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content custom-card glass-panel p-4">
+    <div class="modal-content custom-card glass-panel p-4" style="border-radius: var(--radius-xl);">
       <div class="d-flex justify-content-between align-items-center mb-3">
         <h4 class="serif-heading mb-0" id="inspectBayNum">Bay Information</h4>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -401,8 +343,8 @@
       <div id="inspectBayBody" class="mb-4" style="font-size: 0.92rem;"></div>
 
       <div class="d-flex gap-2">
-        <button type="button" class="btn btn-outline-orange w-100" data-bs-dismiss="modal">Close</button>
-        <a id="inspectBayActionBtn" href="#" class="btn btn-orange w-100 text-center">Reserve Bay</a>
+        <button type="button" class="btn-outline-orange w-100" data-bs-dismiss="modal">Close</button>
+        <a id="inspectBayActionBtn" href="#" class="btn-orange w-100 text-center">Reserve Bay</a>
       </div>
     </div>
   </div>
@@ -419,30 +361,30 @@ function showBayInspectModal(slotNum, floor, section, row, status, vehicleType, 
   let occupantHtml = '';
   if (status === 'OCCUPIED' && plate !== 'None') {
     occupantHtml = `
-      <div class="p-2 rounded mt-2" style="background: rgba(253, 240, 237, 0.7); border:1px solid #F3B5A9;">
-        <span class="text-muted d-block" style="font-size:0.75rem;">CURRENT VEHICLE OCCUPANT</span>
-        <strong class="font-monospace text-danger">${plate}</strong> — <span>${model}</span>
+      <div class="p-3 rounded mt-3" style="background: rgba(253, 240, 237, 0.85); border:1px solid #F3B5A9; border-radius: var(--radius-sm);">
+        <span class="card-label d-block text-muted" style="font-size:0.7rem;">CURRENT VEHICLE OCCUPANT</span>
+        <strong class="font-monospace text-danger" style="font-size:1.1rem;">${plate}</strong> &bull; <span class="fw-bold">${model}</span>
       </div>
     `;
   }
 
   document.getElementById('inspectBayBody').innerHTML = `
-    <div class="p-3 rounded mb-3" style="background-color: var(--bg-card-subtle);">
-      <div class="d-flex justify-content-between mb-1">
+    <div class="p-3 rounded mb-3" style="background-color: var(--bg-card-subtle); border-radius: var(--radius-md);">
+      <div class="d-flex justify-content-between mb-2">
         <span class="text-muted">Floor & Zone:</span>
         <strong>${floor}</strong>
       </div>
-      <div class="d-flex justify-content-between mb-1">
+      <div class="d-flex justify-content-between mb-2">
         <span class="text-muted">Section & Row:</span>
-        <strong>Section ${section} • ${row}</strong>
+        <strong>Section ${section} &bull; ${row}</strong>
       </div>
-      <div class="d-flex justify-content-between mb-1">
-        <span class="text-muted">Supported Vehicle:</span>
-        <strong>${vehicleType.replace('_', ' ')} ${isEv == '1' ? '⚡ (EV Dock)' : ''}</strong>
+      <div class="d-flex justify-content-between mb-2">
+        <span class="text-muted">Vehicle Category:</span>
+        <strong>${vehicleType.replace('_', ' ')} ${isEv == '1' ? '⚡ (EV Supercharger)' : ''}</strong>
       </div>
-      <div class="d-flex justify-content-between mb-1">
+      <div class="d-flex justify-content-between mb-2">
         <span class="text-muted">Sensor State:</span>
-        <span class="badge ${statusBadge}">${status}</span>
+        <span class="badge ${statusBadge} px-2 py-1">${status}</span>
       </div>
       ${occupantHtml}
     </div>

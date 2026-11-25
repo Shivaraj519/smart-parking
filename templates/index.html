@@ -2,71 +2,85 @@
 {% block title %}ParkSmart 2.0 - Smart Mall Parking Platform{% endblock %}
 
 {% block content %}
-<!-- Hero Section -->
-<section class="py-5" style="background: radial-gradient(circle at 80% 20%, rgba(242, 140, 69, 0.12) 0%, rgba(250, 246, 239, 0) 65%);">
+<!-- =========================================================================
+     HERO SECTION: EDITORIAL LUXURY & LIVE DIGITAL TWIN HUD
+     ========================================================================= -->
+<section class="py-5" style="position: relative; overflow: hidden;">
   <div class="container py-lg-4">
     <div class="row align-items-center g-5">
+      <!-- Left Column: Editorial Headline & Actions -->
       <div class="col-lg-7">
-        <div class="d-inline-flex align-items-center gap-2 px-3 py-1 mb-3 rounded-pill" style="background-color: var(--accent-orange-light); border: 1px solid var(--border-subtle);">
-          <span style="font-size:0.75rem;">🏢</span>
-          <span style="font-size: 0.8rem; font-weight: 700; color: var(--accent-terracotta); letter-spacing: 0.05em;">SMART MALL DEPLOYMENT • PHOENIX MALL OF ASIA</span>
+        <div class="d-inline-flex align-items-center gap-2 px-3 py-1 mb-3 rounded-pill" style="background-color: var(--accent-orange-light); border: 1px solid var(--border-medium);">
+          <span style="font-size:0.85rem;">🏢</span>
+          <span style="font-size: 0.78rem; font-weight: 800; color: var(--accent-terracotta); letter-spacing: 0.08em;">SMART MALL DIGITAL TWIN • PHOENIX MALL OF ASIA</span>
         </div>
 
-        <h1 class="serif-heading display-3 mb-3" style="color: var(--text-espresso); line-height: 1.12;">
-          Your Parking.<br>Your Time.<br><span style="color: var(--accent-orange);">Your Space.</span>
+        <h1 class="serif-heading display-3 mb-3" style="color: var(--text-espresso); line-height: 1.1; font-weight: 800;">
+          Your Parking.<br>Your Time.<br><span style="color: var(--accent-orange); font-style: italic;">Your Space.</span>
         </h1>
 
-        <p class="lead mb-4" style="max-width: 580px;">
-          Discover smarter parking experiences with real-time availability, effortless check-ins and intelligent vehicle tracking across premium commercial malls.
+        <p class="lead mb-4 text-muted" style="max-width: 580px; font-size: 1.12rem;">
+          Discover smarter parking experiences with real-time ultrasonic availability, sub-15s boom barrier check-ins, and indoor pedestrian wayfinding across multi-level commercial basements.
         </p>
 
         <div class="d-flex flex-wrap gap-3 mb-5">
           <a href="{{ url_for('parking_availability') }}" class="btn-orange py-3 px-4" style="font-size: 1rem;">
             Find Parking Bay &rarr;
           </a>
+          <a href="{{ url_for('find_my_car') }}" class="btn-outline-orange py-3 px-4">
+            📍 Locate My Car
+          </a>
           {% if session.get('user_id') %}
-            <a href="{{ url_for('user_dashboard') }}" class="btn-outline-orange py-3 px-4">
-              My Driver Dashboard
+            <a href="{{ url_for('user_dashboard') }}" class="btn-outline-orange py-3 px-3">
+              Driver Dashboard
             </a>
           {% else %}
-            <a href="{{ url_for('login') }}" class="btn-outline-orange py-3 px-4">
+            <a href="{{ url_for('login') }}" class="btn-outline-orange py-3 px-3">
               Driver Sign In
             </a>
           {% endif %}
-          <a href="{{ url_for('find_my_car') }}" class="btn-outline-orange py-3 px-3" style="background-color: #FFFFFF;">
-            📍 Find My Car
-          </a>
         </div>
 
         <!-- Trust Signals / Real-time Mall Pulse -->
-        <div class="row g-3 pt-3 border-top" style="border-color: var(--border-subtle) !important;">
+        <div class="row g-3 pt-4 border-top" style="border-color: var(--border-subtle) !important;">
           <div class="col-sm-4 col-6">
-            <div class="card-label">AVAILABLE BAYS</div>
-            <div class="h3 fw-bold mb-0 text-success">{{ stats.available_slots }}</div>
-            <small class="text-muted">Live across {{ stats.total_areas }} zones</small>
+            <div class="card-label mb-1">AVAILABLE BAYS</div>
+            <div class="d-flex align-items-baseline gap-2">
+              <span class="display-6 fw-bold mb-0 text-success">{{ stats.available_slots }}</span>
+              <span class="badge badge-available py-1 px-2" style="font-size:0.7rem;">READY</span>
+            </div>
+            <small class="text-muted d-block mt-1">Live across {{ stats.total_areas }} zones</small>
           </div>
+
           <div class="col-sm-4 col-6">
-            <div class="card-label">ACTIVE PARKED</div>
-            <div class="h3 fw-bold mb-0" style="color: var(--accent-terracotta);">{{ stats.occupied_slots }}</div>
-            <small class="text-muted">In-session vehicles</small>
+            <div class="card-label mb-1">ACTIVE PARKED</div>
+            <div class="d-flex align-items-baseline gap-2">
+              <span class="display-6 fw-bold mb-0" style="color: var(--accent-terracotta);">{{ stats.occupied_slots }}</span>
+              <span class="badge badge-occupied py-1 px-2" style="font-size:0.7rem;">IN SESSION</span>
+            </div>
+            <small class="text-muted d-block mt-1">Vehicles monitored</small>
           </div>
+
           <div class="col-sm-4 col-12">
-            <div class="card-label">EV CHARGING DOCKS</div>
-            <div class="h3 fw-bold mb-0" style="color: var(--text-espresso);">12 Fast Bays</div>
-            <small class="text-muted">Zones Gold & Platinum</small>
+            <div class="card-label mb-1">EV CHARGING DOCKS</div>
+            <div class="d-flex align-items-baseline gap-2">
+              <span class="display-6 fw-bold mb-0" style="color: var(--text-espresso);">12</span>
+              <span class="badge bg-warning text-dark py-1 px-2" style="font-size:0.7rem; font-weight:700;">150kW DC</span>
+            </div>
+            <small class="text-muted d-block mt-1">Zones Gold & Platinum</small>
           </div>
         </div>
       </div>
 
-      <!-- Hero Visual Representation of Smart Mall Parking -->
+      <!-- Right Column: Hero Live Digital Twin HUD -->
       <div class="col-lg-5">
-        <div class="custom-card hero-glass p-4" style="border: 2px solid var(--border-strong);">
+        <div class="hero-glass-terminal">
           <div class="d-flex justify-content-between align-items-center mb-3">
             <div>
-              <span class="card-label d-block mb-1">FLAGSHIP MALL RADAR</span>
-              <h5 class="fw-bold mb-0" style="color: var(--text-espresso);">Phoenix Mall of Asia</h5>
+              <span class="card-label d-block mb-1">FACILITY DIGITAL TWIN</span>
+              <h4 class="serif-heading mb-0" style="color: var(--text-espresso);">Phoenix Mall of Asia</h4>
             </div>
-            <span class="badge badge-available px-3 py-1">GATES ACTIVE</span>
+            <span class="badge badge-available px-3 py-1">RADAR ONLINE</span>
           </div>
 
           <p class="text-muted mb-3" style="font-size: 0.84rem;">
@@ -74,40 +88,43 @@
           </p>
 
           <!-- Zone Breakdown Mini Card -->
-          <div class="p-3 rounded mb-3" style="background-color: var(--bg-card-subtle); border: 1px solid var(--border-subtle);">
-            <div class="d-flex justify-content-between mb-2" style="font-size:0.86rem;">
-              <span><strong>Basement 1 (Zone Gold)</strong>:</span>
-              <span class="text-success fw-bold">EV & Premium Sedans</span>
+          <div class="p-3 rounded mb-3" style="background-color: var(--bg-card-subtle); border: 1px solid var(--border-subtle); border-radius: var(--radius-md);">
+            <div class="d-flex justify-content-between align-items-center mb-2" style="font-size:0.86rem;">
+              <span><strong>Basement 1 (Zone Gold)</strong></span>
+              <span class="badge badge-available px-2 py-1">EV & Premium</span>
             </div>
-            <div class="d-flex justify-content-between mb-2" style="font-size:0.86rem;">
-              <span><strong>Basement 2 (Zone Platinum)</strong>:</span>
-              <span class="text-success fw-bold">SUVs & Multi-Capacity</span>
+            <div class="d-flex justify-content-between align-items-center mb-2" style="font-size:0.86rem;">
+              <span><strong>Basement 2 (Zone Platinum)</strong></span>
+              <span class="badge badge-available px-2 py-1">Standard 4W</span>
             </div>
-            <div class="d-flex justify-content-between" style="font-size:0.86rem;">
-              <span><strong>Lower Ground (Express Zone)</strong>:</span>
-              <span class="text-success fw-bold">Two-Wheeler Express</span>
+            <div class="d-flex justify-content-between align-items-center" style="font-size:0.86rem;">
+              <span><strong>Lower Ground (Express)</strong></span>
+              <span class="badge badge-available px-2 py-1">Two-Wheelers</span>
             </div>
           </div>
 
           <!-- Live Visual Bay Snippet -->
-          <div class="card-label mb-2">LIVE SENSOR GLANCE</div>
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <span class="card-label">ULTRASONIC SENSOR TELEMETRY</span>
+            <span class="text-success fw-bold" style="font-size:0.72rem;">● 100% REFRESHED</span>
+          </div>
           <div class="d-flex gap-2 mb-3">
-            <div class="p-2 flex-fill text-center rounded status-available" style="background:var(--status-available-bg); border:1px solid var(--status-available-border);">
-              <div class="font-monospace fw-bold" style="font-size:0.88rem;">PMA-B1-A01</div>
-              <div style="font-size:0.65rem; color:var(--status-available-text); font-weight:700;">FREE • SEDAN</div>
+            <div class="p-2 flex-fill text-center rounded status-available" style="background:var(--status-available-bg); border:1px solid var(--status-available-border); border-radius:10px;">
+              <div class="font-monospace fw-bold" style="font-size:0.85rem;">P-B1-01</div>
+              <div style="font-size:0.65rem; color:var(--status-available-text); font-weight:700;">FREE • 4W</div>
             </div>
-            <div class="p-2 flex-fill text-center rounded status-reserved" style="background:var(--status-reserved-bg); border:1px solid var(--status-reserved-border);">
-              <div class="font-monospace fw-bold" style="font-size:0.88rem;">PMA-B1-A02</div>
+            <div class="p-2 flex-fill text-center rounded status-reserved" style="background:var(--status-reserved-bg); border:1px solid var(--status-reserved-border); border-radius:10px;">
+              <div class="font-monospace fw-bold" style="font-size:0.85rem;">P-B1-02</div>
               <div style="font-size:0.65rem; color:var(--status-reserved-text); font-weight:700;">RESERVED</div>
             </div>
-            <div class="p-2 flex-fill text-center rounded status-occupied" style="background:var(--status-occupied-bg); border:1px solid var(--status-occupied-border);">
-              <div class="font-monospace fw-bold" style="font-size:0.88rem;">PMA-B1-B01</div>
+            <div class="p-2 flex-fill text-center rounded status-occupied" style="background:var(--status-occupied-bg); border:1px solid var(--status-occupied-border); border-radius:10px;">
+              <div class="font-monospace fw-bold" style="font-size:0.85rem;">P-B1-08</div>
               <div style="font-size:0.65rem; color:var(--status-occupied-text); font-weight:700;">OCCUPIED</div>
             </div>
           </div>
 
-          <a href="{{ url_for('parking_availability') }}" class="btn-orange w-100 justify-content-center py-2" style="font-size:0.9rem;">
-            Explore Interactive Visual Grid &rarr;
+          <a href="{{ url_for('find_my_car') }}" class="btn-orange w-100 justify-content-center py-2" style="font-size:0.92rem;">
+            Open Interactive 3D Mall Map &rarr;
           </a>
         </div>
       </div>
@@ -115,15 +132,102 @@
   </div>
 </section>
 
-<!-- Supported Mall Locations Strip -->
-<section class="py-5" style="background-color: var(--bg-card); border-top: 1px solid var(--border-subtle); border-bottom: 1px solid var(--border-subtle);">
-  <div class="container">
+<!-- =========================================================================
+     LUXURY BENTO GRID: 4 CORE INNOVATION PILLARS
+     ========================================================================= -->
+<section class="py-5" style="background-color: var(--bg-surface); border-top: 1px solid var(--border-subtle); border-bottom: 1px solid var(--border-subtle);">
+  <div class="container py-lg-4">
+    <div class="text-center max-w-600 mx-auto mb-5">
+      <span class="card-label">ENTERPRISE CAPABILITIES</span>
+      <h2 class="serif-heading display-6 mb-2">Designed for Large-Scale Commercial Malls</h2>
+      <p class="text-muted">A modern fusion of relational database transactions, real-time sensor telematics, and pedestrian indoor navigation.</p>
+    </div>
+
+    <div class="bento-grid">
+      <!-- Bento 1: Find My Car & Wayfinding (Large 7 Cols) -->
+      <div class="bento-item" style="grid-column: span 7;">
+        <div>
+          <div class="bento-badge-icon">📍</div>
+          <span class="card-label d-block mb-1">INDOOR PEDESTRIAN ROUTING</span>
+          <h3 class="serif-heading mb-2">Find My Car with Turn-by-Turn Wayfinding</h3>
+          <p class="text-muted" style="font-size: 0.92rem;">
+            Never search through 3 basement levels again. Enter any license plate to pinpoint the exact floor, section, and row, with automated walking directions plotted directly from the central Lobby B elevators.
+          </p>
+        </div>
+        <div class="p-3 rounded mt-3 d-flex justify-content-between align-items-center" style="background: var(--bg-card-subtle); border: 1px solid var(--border-subtle); border-radius: var(--radius-md);">
+          <div class="d-flex align-items-center gap-3">
+            <span class="badge bg-dark font-monospace text-warning px-3 py-2" style="font-size:0.85rem;">KA01MH1001</span>
+            <span style="font-size:0.85rem;">Tata Nexon EV &bull; <strong>P-B1-02 (Zone Gold)</strong></span>
+          </div>
+          <a href="{{ url_for('find_my_car') }}?search_query=KA01MH1001" class="btn-outline-orange py-1 px-3" style="font-size:0.8rem;">
+            Test Demo Route &rarr;
+          </a>
+        </div>
+      </div>
+
+      <!-- Bento 2: Watchman Mobile Barrier Terminal (5 Cols) -->
+      <div class="bento-item" style="grid-column: span 5;">
+        <div>
+          <div class="bento-badge-icon">🛡️</div>
+          <span class="card-label d-block mb-1">BOOM BARRIER GATEWAYS</span>
+          <h3 class="serif-heading mb-2">Sub-15s Watchman Terminal</h3>
+          <p class="text-muted" style="font-size: 0.92rem;">
+            Touch-first interface designed for gate guards on mobile tablets. Scan 8-character booking codes or license plates to verify reservations and raise boom barriers with zero manual paper ticketing delays.
+          </p>
+        </div>
+        <div class="mt-3">
+          <a href="{{ url_for('watchman_login') }}" class="btn-outline-orange w-100 justify-content-center py-2" style="font-size:0.85rem;">
+            Open Watchman Terminal (watchman / watchman123) &rarr;
+          </a>
+        </div>
+      </div>
+
+      <!-- Bento 3: ACID Concurrency Shield (5 Cols) -->
+      <div class="bento-item" style="grid-column: span 5;">
+        <div>
+          <div class="bento-badge-icon">🔒</div>
+          <span class="card-label d-block mb-1">TRANSACTIONAL INTEGRITY</span>
+          <h3 class="serif-heading mb-2">Zero Double-Booking Guarantee</h3>
+          <p class="text-muted" style="font-size: 0.92rem;">
+            Built with strict ACID transaction isolation and pessimistic row locking (<code class="font-monospace text-terracotta">SELECT ... FOR UPDATE</code>). Eliminates race conditions so two drivers can never book overlapping time windows.
+          </p>
+        </div>
+        <div class="p-2 px-3 rounded mt-3" style="background: var(--bg-card-subtle); border: 1px solid var(--border-subtle); font-size:0.8rem;">
+          <span class="text-success fw-bold">✓ 3NF Normalized Schema</span> &bull; <span>Foreign Key Integrity</span>
+        </div>
+      </div>
+
+      <!-- Bento 4: Digital Wallet & Rapid Checkout (7 Cols) -->
+      <div class="bento-item" style="grid-column: span 7;">
+        <div>
+          <div class="bento-badge-icon">💳</div>
+          <span class="card-label d-block mb-1">INSTANT CHECKOUT</span>
+          <h3 class="serif-heading mb-2">Prepaid Digital Wallet & Smart Receipts</h3>
+          <p class="text-muted" style="font-size: 0.92rem;">
+            Pre-fund your driver account with one-click deposits. When exiting the barrier gate, our duration engine automatically computes exact parking minutes, applies pricing tiers, deducts the fee, and generates a downloadable PDF receipt.
+          </p>
+        </div>
+        <div class="d-flex flex-wrap gap-2 mt-3">
+          <span class="badge bg-light text-dark border p-2">⚡ Automated Minute Math</span>
+          <span class="badge bg-light text-dark border p-2">🧾 Instant Invoicing</span>
+          <span class="badge bg-light text-dark border p-2">🔄 Real-Time Slot Release</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =========================================================================
+     SUPPORTED SMART MALL LOCATIONS
+     ========================================================================= -->
+<section class="py-5">
+  <div class="container py-lg-4">
     <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
       <div>
-        <span class="card-label">COMMERCIAL HUBS</span>
-        <h3 class="serif-heading mb-1">Our Supported Smart Facilities</h3>
+        <span class="card-label">CONNECTED INFRASTRUCTURE</span>
+        <h3 class="serif-heading mb-1">Supported Commercial Facilities</h3>
       </div>
-      <a href="{{ url_for('parking_availability') }}" class="btn-outline-orange btn-sm">View All Live Slots</a>
+      <a href="{{ url_for('parking_availability') }}" class="btn-outline-orange py-2 px-3" style="font-size:0.85rem;">View All Live Bays</a>
     </div>
 
     <div class="row g-4">
@@ -137,10 +241,10 @@
             </div>
             <p class="text-muted mb-3" style="font-size: 0.82rem;">📍 {{ area.location_address }}</p>
             
-            <div class="p-2 px-3 rounded mb-3" style="background-color: var(--bg-card-subtle); font-size: 0.82rem;">
+            <div class="p-2 px-3 rounded mb-3" style="background-color: var(--bg-card-subtle); font-size: 0.82rem; border-radius: var(--radius-sm);">
               <div class="d-flex justify-content-between mb-1">
-                <span>Total Bays:</span>
-                <strong>{{ area.total_capacity }}</strong>
+                <span>Total Capacity:</span>
+                <strong>{{ area.total_capacity }} Bays</strong>
               </div>
               <div class="d-flex justify-content-between">
                 <span>Available Now:</span>
@@ -159,13 +263,15 @@
   </div>
 </section>
 
-<!-- How It Works Section -->
-<section class="py-5">
+<!-- =========================================================================
+     HOW IT WORKS: 3-STEP SEAMLESS JOURNEY
+     ========================================================================= -->
+<section class="py-5" style="background-color: var(--bg-surface); border-top: 1px solid var(--border-subtle);">
   <div class="container py-lg-4">
     <div class="text-center max-w-600 mx-auto mb-5">
       <span class="card-label">SEAMLESS JOURNEY</span>
       <h2 class="serif-heading display-6 mb-2">How Smart Mall Parking Works</h2>
-      <p class="text-muted">Effortless vehicle management from your phone directly to the mall entrance gate.</p>
+      <p class="text-muted">Effortless vehicle management from your phone directly through the barrier gate.</p>
     </div>
 
     <div class="row g-4">
@@ -176,7 +282,7 @@
           </div>
           <h5 class="fw-bold mb-2">Discover & Reserve</h5>
           <p class="text-muted" style="font-size: 0.9rem;">
-            Check live floor-wise availability at Phoenix Mall of Asia. Lock your slot with guaranteed concurrency control.
+            Check live floor-wise availability at Phoenix Mall of Asia. Lock your slot with guaranteed concurrency control and get your 8-char booking code.
           </p>
         </div>
       </div>
@@ -188,7 +294,7 @@
           </div>
           <h5 class="fw-bold mb-2">Fast Watchman Check-In</h5>
           <p class="text-muted" style="font-size: 0.9rem;">
-            Present your digital pass or QR code at Gate 1 or Gate 2. The security watchman scans and raises the barrier instantly.
+            Present your booking code or license plate at Gate 1 or Gate 2. The security watchman terminal verifies and raises the barrier boom instantly.
           </p>
         </div>
       </div>
@@ -200,7 +306,7 @@
           </div>
           <h5 class="fw-bold mb-2">Find My Car & Exit</h5>
           <p class="text-muted" style="font-size: 0.9rem;">
-            Finished shopping? Use our indoor wayfinding tool to pinpoint your car's floor and row, and exit seamlessly.
+            Finished shopping? Use our indoor wayfinding tool to pinpoint your car's floor and row with walking route from elevators, and exit with automated wallet clearance.
           </p>
         </div>
       </div>

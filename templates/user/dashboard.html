@@ -3,23 +3,38 @@
 
 {% block content %}
 <div class="container py-4">
-  <!-- Top Welcome Banner -->
-  <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
-    <div>
-      <span class="card-label">CUSTOMER PORTAL</span>
-      <h2 class="serif-heading mb-1">Welcome back, {{ user.full_name }}</h2>
+  <!-- Top Welcome Banner & Luxury Wallet -->
+  <div class="row g-4 align-items-center mb-4">
+    <div class="col-lg-7">
+      <div class="d-inline-flex align-items-center gap-2 px-3 py-1 mb-2 rounded-pill" style="background-color: var(--accent-orange-light); border: 1px solid var(--border-medium);">
+        <span>👤</span>
+        <span style="font-size: 0.78rem; font-weight: 800; color: var(--accent-terracotta); letter-spacing: 0.08em;">REGISTERED DRIVER CONSOLE</span>
+      </div>
+      <h2 class="serif-heading mb-1 display-6">Welcome back, {{ user.full_name }}</h2>
       <p class="text-muted mb-0" style="font-size:0.92rem;">
-        License: <code>{{ user.license_number }}</code> • Contact: {{ user.phone_number }}
+        Driving License: <code>{{ user.license_number }}</code> &bull; Phone: {{ user.phone_number }}
       </p>
     </div>
 
-    <!-- Wallet Card -->
-    <div class="custom-card p-3 d-flex align-items-center gap-3" style="border-left: 4px solid var(--accent-orange);">
-      <div>
-        <div class="card-label">ParkSmart Wallet</div>
-        <div class="stat-value text-success" style="font-size:1.75rem;">₹{{ "%.2f"|format(user.wallet_balance) }}</div>
+    <!-- Luxury Terracotta Digital Wallet Card -->
+    <div class="col-lg-5">
+      <div class="p-4 rounded shadow-sm text-white position-relative overflow-hidden" 
+           style="background: linear-gradient(135deg, #B85C2E, #D97736, #241E1A); border-radius: var(--radius-lg); box-shadow: var(--shadow-orange);">
+        <div class="d-flex justify-content-between align-items-start mb-3">
+          <div>
+            <span class="card-label text-white-50 d-block mb-1" style="font-size:0.68rem; letter-spacing:0.12em;">PREPAID MOBILITY PASS</span>
+            <div class="h3 fw-bold mb-0 font-monospace text-white" style="letter-spacing:-0.02em;">₹{{ "%.2f"|format(user.wallet_balance) }}</div>
+          </div>
+          <button class="btn btn-sm btn-light fw-bold px-3 py-1 text-dark rounded-pill" data-bs-toggle="modal" data-bs-target="#topupModal" style="font-size:0.8rem;">
+            + Top Up
+          </button>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-end pt-2 border-top border-white-50" style="font-size:0.78rem;">
+          <span class="text-white-50">Auto-clears at mall exit boom</span>
+          <span class="badge bg-white text-dark font-monospace py-1 px-2" style="font-size:0.68rem;">RFID LINKED</span>
+        </div>
       </div>
-      <button class="btn btn-outline-orange btn-sm" data-bs-toggle="modal" data-bs-target="#topupModal">+ Top-Up</button>
     </div>
   </div>
 
@@ -28,14 +43,14 @@
     <div class="col-md-3 col-6">
       <div class="custom-card p-3">
         <div class="card-label">Enrolled Vehicles</div>
-        <div class="stat-value" style="font-size: 1.8rem;">{{ vehicles|length }}</div>
+        <div class="stat-value">{{ vehicles|length }}</div>
         <small class="text-muted"><a href="{{ url_for('user_vehicles') }}" class="text-decoration-none" style="color:var(--accent-terracotta);">Manage Vehicles &rarr;</a></small>
       </div>
     </div>
     <div class="col-md-3 col-6">
       <div class="custom-card p-3">
         <div class="card-label">Active / Upcoming Passes</div>
-        <div class="stat-value text-primary" style="font-size: 1.8rem;">
+        <div class="stat-value text-primary">
           {{ reservations | selectattr('booking_status', 'in', ['CONFIRMED', 'CHECKED_IN']) | list | length }}
         </div>
         <small class="text-muted">Current permits</small>
@@ -44,14 +59,14 @@
     <div class="col-md-3 col-6">
       <div class="custom-card p-3">
         <div class="card-label">Lifetime Bookings</div>
-        <div class="stat-value" style="font-size: 1.8rem;">{{ reservations|length }}</div>
+        <div class="stat-value">{{ reservations|length }}</div>
         <small class="text-muted">Total mall visits</small>
       </div>
     </div>
     <div class="col-md-3 col-6">
       <div class="custom-card p-3">
         <div class="card-label">Total Amount Spent</div>
-        <div class="stat-value" style="font-size: 1.8rem; color: var(--text-espresso);">₹{{ "%.2f"|format(total_spent) }}</div>
+        <div class="stat-value" style="color: var(--text-espresso);">₹{{ "%.2f"|format(total_spent) }}</div>
         <small class="text-muted"><a href="{{ url_for('user_payments') }}" class="text-decoration-none" style="color:var(--accent-terracotta);">Payment history &rarr;</a></small>
       </div>
     </div>
@@ -60,13 +75,13 @@
   <!-- Active Bookings & Entry/Exit Tracking Section -->
   <div class="row g-4 mb-5">
     <div class="col-lg-8">
-      <div class="custom-card h-100">
+      <div class="custom-card p-4 h-100">
         <div class="d-flex justify-content-between align-items-center mb-3">
           <div>
             <h5 class="fw-bold mb-0">Active & Upcoming Passes</h5>
-            <small class="text-muted">Present QR or passcode at Phoenix Mall of Asia Gate</small>
+            <small class="text-muted">Present barcode or passcode at Phoenix Mall Gate</small>
           </div>
-          <a href="{{ url_for('parking_availability') }}" class="btn-orange btn-sm">+ Book New Bay</a>
+          <a href="{{ url_for('parking_availability') }}" class="btn-orange py-1 px-3" style="font-size:0.85rem;">+ Book New Bay</a>
         </div>
 
         {% set active_res = reservations | selectattr('booking_status', 'in', ['CONFIRMED', 'CHECKED_IN']) | list %}
@@ -113,10 +128,10 @@
                     </form>
                     <form method="POST" action="{{ url_for('gate_checkin') }}" class="d-inline">
                       <input type="hidden" name="booking_code" value="{{ r.booking_code }}">
-                      <button type="submit" class="btn btn-orange btn-sm py-0 px-2" style="font-size:0.78rem;">Gate Check-In</button>
+                      <button type="submit" class="btn-orange py-0 px-2" style="font-size:0.78rem;">Check-In</button>
                     </form>
                   {% elif r.booking_status == 'CHECKED_IN' %}
-                    <a href="{{ url_for('find_my_car') }}?search_query={{ r.license_plate }}" class="btn btn-sm btn-outline-orange py-0 px-2" style="font-size:0.78rem;">
+                    <a href="{{ url_for('find_my_car') }}?search_query={{ r.license_plate }}" class="btn-outline-orange py-0 px-2" style="font-size:0.78rem;">
                       📍 Find Car
                     </a>
                   {% endif %}
@@ -129,7 +144,7 @@
         {% else %}
         <div class="text-center py-5 text-muted">
           <p class="mb-2">You currently have no active or upcoming parking reservations.</p>
-          <a href="{{ url_for('parking_availability') }}" class="btn-orange btn-sm">Find & Reserve Parking Bay</a>
+          <a href="{{ url_for('parking_availability') }}" class="btn-orange py-2 px-3" style="font-size:0.88rem;">Find & Reserve Parking Bay</a>
         </div>
         {% endif %}
       </div>
@@ -137,7 +152,7 @@
 
     <!-- Gate Entry & Barrier Controller -->
     <div class="col-lg-4">
-      <div class="custom-card h-100">
+      <div class="custom-card p-4 h-100">
         <h5 class="fw-bold mb-2">Gate Check-In Console</h5>
         <p class="text-muted" style="font-size:0.85rem;">
           Arrived at Phoenix Mall of Asia? Enter your booking code to automatically raise the barrier gate.
@@ -146,26 +161,26 @@
         <form method="POST" action="{{ url_for('gate_checkin') }}" class="mt-3">
           <div class="mb-3">
             <label class="card-label">DRIVER BOOKING PASS CODE</label>
-            <input type="text" name="booking_code" class="form-control font-monospace text-uppercase" placeholder="e.g. PK-A01001" required>
+            <input type="text" name="booking_code" class="form-control-custom font-monospace text-uppercase mt-1" placeholder="e.g. PK-A01001" required>
           </div>
-          <button type="submit" class="btn-orange w-100 justify-content-center py-2">
+          <button type="submit" class="btn-orange w-100 justify-content-center py-2" style="font-size:0.92rem;">
             Confirm Barrier Entry (Check-In)
           </button>
         </form>
 
-        <div class="mt-4 pt-3 border-top">
+        <div class="mt-4 pt-3 border-top" style="border-color: var(--border-subtle) !important;">
           <div class="d-flex justify-content-between align-items-center mb-2">
             <h6 class="fw-bold mb-0" style="font-size:0.85rem;">Enrolled Vehicles</h6>
             <a href="{{ url_for('user_vehicles') }}" class="text-decoration-none" style="font-size:0.78rem; color:var(--accent-terracotta);">+ Add Vehicle</a>
           </div>
           <div class="d-flex flex-column gap-2">
             {% for v in vehicles[:3] %}
-            <div class="p-2 rounded d-flex justify-content-between align-items-center" style="background-color: var(--bg-card-subtle); font-size:0.82rem;">
+            <div class="p-2 px-3 rounded d-flex justify-content-between align-items-center" style="background-color: var(--bg-card-subtle); font-size:0.82rem; border-radius: var(--radius-sm);">
               <div>
                 <strong>{{ v.license_plate }}</strong>
                 <span class="text-muted d-block">{{ v.make_model or v.vehicle_type }}</span>
               </div>
-              <span class="badge bg-light text-dark border">{{ v.vehicle_type }}</span>
+              <span class="badge bg-white text-dark border">{{ v.vehicle_type }}</span>
             </div>
             {% endfor %}
           </div>
@@ -178,14 +193,14 @@
 <!-- Modal for Wallet Topup -->
 <div class="modal fade" id="topupModal" tabindex="-1">
   <div class="modal-dialog modal-sm modal-dialog-centered">
-    <div class="modal-content custom-card p-4">
+    <div class="modal-content custom-card glass-panel p-4" style="border-radius: var(--radius-xl);">
       <h5 class="fw-bold mb-3">Add Wallet Funds</h5>
       <form method="POST" action="{{ url_for('user_topup_wallet') }}">
         <div class="mb-3">
           <label class="card-label">TOP-UP AMOUNT (₹)</label>
-          <input type="number" name="amount" class="form-control" value="500" min="50" step="50" required>
+          <input type="number" name="amount" class="form-control-custom mt-1" value="500" min="50" step="50" required>
         </div>
-        <button type="submit" class="btn-orange w-100 justify-content-center py-2">Simulate Payment & Add</button>
+        <button type="submit" class="btn-orange w-100 justify-content-center py-2" style="font-size:0.92rem;">Simulate Payment & Add</button>
       </form>
     </div>
   </div>
